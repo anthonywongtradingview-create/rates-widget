@@ -63,90 +63,91 @@
     </div>
   </div>
 
-  <script>
-    // === CONFIG ===
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=0&single=true&output=csv";
-    const BASE = "EUR", QUOTE = "USD"; // Which pair to use from your CSV
+<script>
+  // === CONFIG ===
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=0&single=true&output=csv";
+  const BASE = "EUR", QUOTE = "USD"; // Which pair to use from your CSV
 
-    // === INITIALIZE DROPDOWNS ===
-    const marginSelect = document.getElementById("margin");
-    const volumeSelect = document.getElementById("volume");
-    for (let i = 0.15; i <= 3.0; i += 0.05) {
-      const opt = document.createElement("option");
-      opt.value = i / 100;
-      opt.textContent = (i).toFixed(3) + "%";
-      marginSelect.appendChild(opt);
-    }
-    for (let v = 10000; v <= 100000; v += 10000) {
-      const opt = document.createElement("option");
-      opt.value = v;
-      opt.textContent = v.toLocaleString();
-      volumeSelect.appendChild(opt);
-    }
+  // === INITIALIZE DROPDOWNS ===
+  const marginSelect = document.getElementById("margin");
+  const volumeSelect = document.getElementById("volume");
+  for (let i = 0.15; i <= 3.0; i += 0.05) {
+    const opt = document.createElement("option");
+    opt.value = i / 100;
+    opt.textContent = i.toFixed(3) + "%";
+    marginSelect.appendChild(opt);
+  }
+  for (let v = 10000; v <= 100000; v += 10000) {
+    const opt = document.createElement("option");
+    opt.value = v;
+    opt.textContent = v.toLocaleString();
+    volumeSelect.appendChild(opt);
+  }
 
-    // === FETCH & PARSE CSV ===
-    async function fetchCSV(url) {
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to fetch CSV: " + res.status);
-      return await res.text();
-    }
+  // === FETCH & PARSE CSV ===
+  async function fetchCSV(url) {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch CSV: " + res.status);
+    return await res.text();
+  }
 
-    function parseCSV(text) {
-      const lines = text.trim().split(/\r?\n/);
-      const header = lines.shift().split(",").map(h => h.trim());
-      const idx = {
-        Base: header.findIndex(h => h.toLowerCase() === "base"),
-        Quote: header.findIndex(h => h.toLowerCase() === "quote"),
-        Rate: header.findIndex(h => h.toLowerCase() === "rate"),
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
+    const idx = {
+      base: header.indexOf("base"),
+      quote: header.indexOf("quote"),
+      rate: header.indexOf("rate"),
+      time: header.indexOf("time_of_rate")  // new column
+    };
+    return lines.map(line => {
+      const cols = line.split(",").map(c => c.trim());
+      return {
+        base: cols[idx.base],
+        quote: cols[idx.quote],
+        rate: parseFloat(cols[idx.rate]),
+        time: idx.time >= 0 ? cols[idx.time] : null
       };
-      const rows = lines.map(line => {
-        const cols = line.split(",").map(c => c.trim());
-        return {
-          base: cols[idx.Base],
-          quote: cols[idx.Quote],
-          rate: parseFloat(cols[idx.Rate]),
-        };
-      });
-      return rows.filter(r => r.base && r.quote && Number.isFinite(r.rate));
-    }
+    }).filter(r => r.base && r.quote && Number.isFinite(r.rate));
+  }
 
-    // === RENDER DASHBOARD ===
-    async function main() {
-      try {
-        const csv = await fetchCSV(CSV_URL);
-        const data = parseCSV(csv);
-        const pair = data.find(r => r.base === BASE && r.quote === QUOTE);
-        if (!pair) throw new Error("EUR/USD not found in data");
+  // === RENDER DASHBOARD ===
+  async function main() {
+    try {
+      const csv = await fetchCSV(CSV_URL);
+      const data = parseCSV(csv);
+      const pair = data.find(r => r.base === BASE && r.quote === QUOTE);
+      if (!pair) throw new Error("EUR/USD not found in data");
 
-        const marketRate = pair.rate;
-        const rateEl = document.getElementById("marketRate");
-        const offerEl = document.getElementById("offerRate");
-        const invEl = document.getElementById("inverseRate");
-        const updateEl = document.getElementById("lastUpdate");
+      const marketRate = pair.rate;
+      const rateEl = document.getElementById("marketRate");
+      const offerEl = document.getElementById("offerRate");
+      const invEl = document.getElementById("inverseRate");
+      const updateEl = document.getElementById("lastUpdate");
 
-        rateEl.textContent = marketRate.toFixed(6);
-        const updateTime = new Date().toLocaleString();
-        updateEl.textContent = updateTime;
+      rateEl.textContent = marketRate.toFixed(6);
+      updateEl.textContent = pair.time || "unknown";
 
-        function recalc() {
-          const margin = parseFloat(marginSelect.value) || 0;
-          const adjusted = marketRate * (1 - margin);
-          const inverse = (1 / marketRate) * (1 - margin);
-          offerEl.textContent = adjusted.toFixed(6);
-          invEl.textContent = inverse.toFixed(6);
-        }
-
-        marginSelect.addEventListener("change", recalc);
-        volumeSelect.addEventListener("change", recalc);
-        recalc();
-
-      } catch (e) {
-        document.body.innerHTML = `<p style="color:#b00;">${e.message}</p>`;
-        console.error(e);
+      function recalc() {
+        const margin = parseFloat(marginSelect.value) || 0;
+        const adjusted = marketRate * (1 - margin);
+        const inverse = (1 / marketRate) * (1 - margin);
+        offerEl.textContent = adjusted.toFixed(6);
+        invEl.textContent = inverse.toFixed(6);
       }
-    }
 
-    main();
-  </script>
+      marginSelect.addEventListener("change", recalc);
+      volumeSelect.addEventListener("change", recalc);
+      recalc();
+
+    } catch (e) {
+      document.body.innerHTML = `<p style="color:#b00;">${e.message}</p>`;
+      console.error(e);
+    }
+  }
+
+  main();
+</script>
+
 </body>
 </html>
