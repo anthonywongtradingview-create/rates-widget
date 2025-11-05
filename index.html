@@ -70,6 +70,42 @@
     #combinedHolidays td:nth-child(1) { width: 30%; }
     #combinedHolidays td:nth-child(2) { width: 20%; }
     #combinedHolidays td:nth-child(3) { width: 50%; }
+    
+    /* Compact layout for upcoming events */
+    #upcomingEvents {
+      max-width: 800px;          /* keeps it narrower than full width */
+      margin-top: 10px;
+      overflow-x: auto;           /* adds horizontal scroll on smaller screens */
+    }
+
+    #upcomingEvents table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      table-layout: fixed;        /* prevents columns from expanding too wide */
+    }
+
+    #upcomingEvents th,
+    #upcomingEvents td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+      text-align: left;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+
+    #upcomingEvents th {
+      background: #f0f0f0;
+    }
+
+    #upcomingEvents td:nth-child(1) { width: 22%; } /* Date & Time */
+    #upcomingEvents td:nth-child(2) { width: 10%; } /* Currency */
+    #upcomingEvents td:nth-child(3) { width: 10%; } /* Importance */
+    #upcomingEvents td:nth-child(4) { width: 28%; } /* Event */
+    #upcomingEvents td:nth-child(5),
+    #upcomingEvents td:nth-child(6),
+    #upcomingEvents td:nth-child(7) { width: 10%; } /* Actual / Forecast / Previous */
+
   </style>
 </head>
 <body>
