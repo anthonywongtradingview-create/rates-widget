@@ -57,9 +57,9 @@
     </label>
     <div class="info">
       <strong>Market Rate:</strong> <span id="marketRate">Loading...</span><br/>
-      <strong>What we can offer at:</strong> <span id="offerRate">–</span><br/>
-      <strong>Inverse (USD→EUR):</strong> <span id="inverseRate">–</span><br/>
-      <strong>Last Updated:</strong> <span id="lastUpdate">–</span>
+      <strong>We can offer EUR > USD at:</strong> <span id="offerRate">–</span><br/>
+      <strong>We can offer USD > EUR at:</strong> <span id="inverseRate">–</span><br/>
+      <strong>Rate value at:</strong> <span id="lastUpdate">–</span>
     </div>
   </div>
 
@@ -71,7 +71,7 @@
     // === INITIALIZE DROPDOWNS ===
     const marginSelect = document.getElementById("margin");
     const volumeSelect = document.getElementById("volume");
-    for (let i = 0.15; i <= 3.0; i += 0.005) {
+    for (let i = 0.15; i <= 3.0; i += 0.05) {
       const opt = document.createElement("option");
       opt.value = i / 100;
       opt.textContent = (i).toFixed(3) + "%";
