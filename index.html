@@ -98,17 +98,20 @@
       base: header.indexOf("base"),
       quote: header.indexOf("quote"),
       rate: header.indexOf("rate"),
-      time: header.indexOf("time_of_rate")  // new column
+      time: header.indexOf("time_of_rate")
     };
-    return lines.map(line => {
-      const cols = line.split(",").map(c => c.trim());
+
+    const rows = lines.map(line => {
+      const cols = line.split(",").map(c => c.replace(/^"|"$/g, '').trim());
       return {
         base: cols[idx.base],
         quote: cols[idx.quote],
         rate: parseFloat(cols[idx.rate]),
-        time: idx.time >= 0 ? cols[idx.time] : null
+        time: cols[idx.time] || null
       };
-    }).filter(r => r.base && r.quote && Number.isFinite(r.rate));
+    });
+
+    return rows.filter(r => r.base && r.quote && Number.isFinite(r.rate));
   }
 
   // === RENDER DASHBOARD ===
@@ -125,6 +128,7 @@
       const invEl = document.getElementById("inverseRate");
       const updateEl = document.getElementById("lastUpdate");
 
+      // show live data + time from sheet
       rateEl.textContent = marketRate.toFixed(6);
       updateEl.textContent = pair.time || "unknown";
 
