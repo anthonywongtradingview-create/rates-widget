@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Exchange Rates Widget</title>
+  <style>
+    :root { --pad: 16px; }
+    body { font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: var(--pad); color: #111; }
+    h1 { font-size: 18px; margin: 0 0 8px; }
+    .controls { display:flex; gap:8px; align-items:center; margin: 0 0 12px; flex-wrap: wrap; }
+    input[type="number"], input[type="text"], select { padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #e3e3e3; padding: 8px; }
+    th { text-align: right; background: #f8f8f8; position: sticky; top: 0; }
+    th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+    tfoot td { background:#fafafa; font-weight: 600; }
+    .muted { color:#666; font-size:12px; margin-top:6px; }
+  </style>
+</head>
+<body>
+  <h1>Exchange Rates</h1>
+  <div class="controls">
+    <label>Amount (Base): <input id="amount" type="number" step="0.01" value="100"></label>
+    <label>Filter pair (e.g., USD→EUR): 
+      <input id="pair" type="text" placeholder="Optional, e.g. USD/EUR">
+    </label>
+  </div>
+
+  <table id="rates">
+    <thead>
+      <tr>
+        <th>Base</th>
+        <th>Quote</th>
+        <th>Rate (Base→Quote)</th>
+        <th>Inverse (Quote→Base)</th>
+        <th>Converted (Amount×Rate)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot><tr><td colspan="5" id="status" class="muted"></td></tr></tfoot>
+  </table>
+
+  <script>
+    // ====== EDIT THIS with your published-to-web CSV link ======
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pubhtml?gid=0&single=true&output=csv";
+    // ===========================================================
+
+    // Basic CSV fetch/parse (sufficient if your cells don’t contain commas in values)
+    async function fetchCSV(url) {
+      // Prevent long cache; GitHub Pages can still cache the HTML, but CSV is fetched from Google
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to fetch CSV: " + res.status);
+      return await res.text();
+    }
+
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const header = lines.shift().split(",").map(h => h.trim());
+      const idx = {
+        Base: header.findIndex(h => h.toLowerCase() === "base"),
+        Quote: header.findIndex(h => h.toLowerCase() === "quote"),
+        Rate: header.findIndex(h => h.toLowerCase() === "rate"),
+      };
+      const rows = [];
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        // naive split — switch to a real CSV parser if your data can contain commas or quotes
+        const cols = line.split(",").map(c => c.trim());
+        const base = cols[idx.Base];
+        const quote = cols[idx.Quote];
+        const rate = parseFloat(cols[idx.Rate]);
+        if (base && quote && Number.isFinite(rate)) rows.push({ base, quote, rate });
+      }
+      return rows;
+    }
+
+    function render(data) {
+      const tbody = document.querySelector("#rates tbody");
+      const amountEl = document.getElementById("amount");
+      const pairEl = document.getElementById("pair");
+      const statusEl = document.getElementById("status");
+
+      function update() {
+        const amount = parseFloat(amountEl.value || "0");
+        const filter = (pairEl.value || "").toUpperCase().replace(/\s+/g,"").replace(/[^\w/]/g,"");
+        const [fBase, fQuote] = filter.includes("/") ? filter.split("/") : [null, null];
+
+        tbody.innerHTML = "";
+        let shown = 0;
+
+        data.forEach(r => {
+          if (fBase && fQuote) {
+            if (!(r.base.toUpperCase() === fBase && r.quote.toUpperCase() === fQuote)) return;
+          }
+          const inverse = r.rate ? 1 / r.rate : null;
+          const converted = Number.isFinite(amount) ? amount * r.rate : null;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${r.base}</td>
+            <td>${r.quote}</td>
+            <td style="text-align:right;">${r.rate.toFixed(6)}</td>
+            <td style="text-align:right;">${inverse ? inverse.toFixed(6) : "-"}</td>
+            <td style="text-align:right;">${converted !== null ? converted.toFixed(2) : "-"}</td>
+          `;
+          tbody.appendChild(tr);
+          shown++;
+        });
+
+        statusEl.textContent = `${shown} pair(s) shown · Source refresh: Google Sheets publish (typically 5–15 min).`;
+      }
+
+      amountEl.addEventListener("input", update);
+      pairEl.addEventListener("input", update);
+      update();
+    }
+
+    async function main() {
+      try {
+        const csv = await fetchCSV(CSV_URL);
+        const data = parseCSV(csv);
+        render(data);
+      } catch (e) {
+        document.querySelector("#rates tbody").innerHTML =
+          `<tr><td colspan="5" style="text-align:left;color:#b00;">${e.message}. Check CSV URL and "Publish to web" settings.</td></tr>`;
+        console.error(e);
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>
