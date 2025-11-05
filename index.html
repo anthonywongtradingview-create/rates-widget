@@ -74,7 +74,7 @@
   for (let i = 0.15; i <= 3.0; i += 0.05) {
     const opt = document.createElement("option");
     opt.value = i / 100;
-    opt.textContent = i.toFixed(3) + "%";
+    opt.textContent = i.toFixed(2) + "%";
     marginSelect.appendChild(opt);
   }
   for (let v = 10000; v <= 100000; v += 10000) {
