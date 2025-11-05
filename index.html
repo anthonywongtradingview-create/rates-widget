@@ -129,15 +129,15 @@
       const updateEl = document.getElementById("lastUpdate");
 
       // show live data + time from sheet
-      rateEl.textContent = marketRate.toFixed(6);
+      rateEl.textContent = marketRate.toFixed(5);
       updateEl.textContent = pair.time || "unknown";
 
       function recalc() {
         const margin = parseFloat(marginSelect.value) || 0;
         const adjusted = marketRate * (1 - margin);
         const inverse = (1 / marketRate) * (1 - margin);
-        offerEl.textContent = adjusted.toFixed(6);
-        invEl.textContent = inverse.toFixed(6);
+        offerEl.textContent = adjusted.toFixed(5);
+        invEl.textContent = inverse.toFixed(5);
       }
 
       marginSelect.addEventListener("change", recalc);
