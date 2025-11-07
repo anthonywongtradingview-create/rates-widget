@@ -91,6 +91,46 @@ function renderCombinedTable(id, holidays) {
   `;
 }
 
+// === Render economic events table ===
+function renderEventsTable(id, events, limit = 10) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  if (!events.length) {
+    el.innerHTML = "<p>No upcoming events found.</p>";
+    return;
+  }
+
+  const rows = events.slice(0, limit).map(ev => `
+    <tr>
+      <td>${ev.datetime.toLocaleString()}</td>
+      <td>${ev.currency}</td>
+      <td>${ev.importance}</td>
+      <td>${ev.event}</td>
+      <td>${ev.actual}</td>
+      <td>${ev.forecast}</td>
+      <td>${ev.previous}</td>
+    </tr>
+  `).join("");
+
+  el.innerHTML = `
+    <table style="font-size:13px;">
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Currency</th>
+          <th>Importance</th>
+          <th>Event</th>
+          <th>Actual</th>
+          <th>Forecast</th>
+          <th>Previous</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
 // === Main ===
 async function main() {
   try {
