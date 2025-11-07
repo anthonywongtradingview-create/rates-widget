@@ -108,3 +108,32 @@ th { background: #f0f0f0; }
 .offer-table tbody td {
   background-color: #f5fff5;
 }
+
+.revenue-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.revenue-table th,
+.revenue-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.revenue-table thead th {
+  background-color: #f7e69e; /* light yellow header */
+  font-weight: bold;
+}
+
+.revenue-table tbody td:first-child {
+  background-color: #fff9d6; /* lighter yellow left cells */
+  font-weight: bold;
+  text-align: left;
+}
+
+.revenue-table tbody td {
+  background-color: #fffef0;
+}
