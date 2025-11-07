@@ -8,8 +8,24 @@ const EVENTS_CSV_URL =
 // Read which pair this page is for (each HTML sets this via <script>)
 const BASE = window.BASE || "EUR";
 const QUOTE = window.QUOTE || "USD";
-
 console.log(`✅ Loading data for ${BASE}/${QUOTE}`);
+
+// === Currency symbol map ===
+const currencySymbols = {
+  EUR: "€",
+  USD: "$",
+  GBP: "£",
+  CHF: "Fr.",
+  AED: "DH",
+  JPY: "¥",
+  AUD: "A$",
+  CAD: "C$"
+};
+
+// Helper to get symbol (fallback to code)
+function sym(cur) {
+  return currencySymbols[cur] || cur;
+}
 
 // === DROPDOWNS ===
 const marginSelect = document.getElementById("margin");
@@ -38,37 +54,27 @@ async function fetchCSV(url) {
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
-
-  // Dynamic index lookup
-  const idx = {};
-  header.forEach((h, i) => (idx[h] = i));
-
-  const rows = lines.map(line => {
+  return lines.map(line => {
     const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
     return Object.fromEntries(header.map((h, i) => [h, cols[i]]));
   });
-
-  return rows;
 }
 
 // === UTIL: Convert "DD-MMM-YYYY" parts to JS Date ===
 function toDate(day, monAbbr, year) {
   const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
   const m = months.indexOf(String(monAbbr).toUpperCase());
-  if (m < 0) return new Date(); // fallback if month abbreviation invalid
-  return new Date(`${year}-${m + 1}-${day}`);
+  return m >= 0 ? new Date(`${year}-${m + 1}-${day}`) : new Date();
 }
 
-// === Render combined holidays table ===
+// === RENDER HOLIDAYS ===
 function renderCombinedTable(id, holidays) {
   const el = document.getElementById(id);
   if (!el) return;
-
   if (!holidays.length) {
     el.innerHTML = "<p>No upcoming settlement holidays found.</p>";
     return;
   }
-
   const rows = holidays.map(h => `
     <tr>
       <td>${h.jsDate.toLocaleDateString()}</td>
@@ -76,62 +82,16 @@ function renderCombinedTable(id, holidays) {
       <td>${h.name}</td>
     </tr>
   `).join("");
-
   el.innerHTML = `
     <table>
       <thead>
-        <tr>
-          <th style="text-align:left;">Date</th>
-          <th style="text-align:left;">Region</th>
-          <th style="text-align:left;">Holiday</th>
-        </tr>
+        <tr><th>Date</th><th>Region</th><th>Holiday</th></tr>
       </thead>
       <tbody>${rows}</tbody>
-    </table>
-  `;
+    </table>`;
 }
 
-// === Render economic events table ===
-function renderEventsTable(id, events, limit = 10) {
-  const el = document.getElementById(id);
-  if (!el) return;
-
-  if (!events.length) {
-    el.innerHTML = "<p>No upcoming events found.</p>";
-    return;
-  }
-
-  const rows = events.slice(0, limit).map(ev => `
-    <tr>
-      <td>${ev.datetime.toLocaleString()}</td>
-      <td>${ev.currency}</td>
-      <td>${ev.importance}</td>
-      <td>${ev.event}</td>
-      <td>${ev.actual}</td>
-      <td>${ev.forecast}</td>
-      <td>${ev.previous}</td>
-    </tr>
-  `).join("");
-
-  el.innerHTML = `
-    <table style="font-size:13px;">
-      <thead>
-        <tr>
-          <th>Date & Time</th>
-          <th>Currency</th>
-          <th>Importance</th>
-          <th>Event</th>
-          <th>Actual</th>
-          <th>Forecast</th>
-          <th>Previous</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
-}
-
-// === Parse events CSV ===
+// === PARSE EVENTS CSV ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
@@ -144,70 +104,28 @@ function parseEventsCSV(text) {
     forecast: header.indexOf("forecast"),
     previous: header.indexOf("previous")
   };
-
-  const events = [];
-
-  for (const line of lines) {
-    const cols = line.split(",").map(c => c.replace(/^"|"$/g, '').trim());
-    if (cols[idx.datetime] && cols[idx.currency]) {
-      events.push({
-        datetime: new Date(cols[idx.datetime]),
-        currency: cols[idx.currency],
-        importance: cols[idx.importance] || "",
-        event: cols[idx.event] || "",
-        actual: cols[idx.actual] || "",
-        forecast: cols[idx.forecast] || "",
-        previous: cols[idx.previous] || ""
-      });
-    }
-  }
-  return events.sort((a, b) => a.datetime - b.datetime);
+  return lines.map(line => {
+    const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
+    return {
+      datetime: new Date(cols[idx.datetime]),
+      currency: cols[idx.currency],
+      importance: cols[idx.importance],
+      event: cols[idx.event],
+      actual: cols[idx.actual],
+      forecast: cols[idx.forecast],
+      previous: cols[idx.previous]
+    };
+  }).filter(e => e.datetime).sort((a,b) => a.datetime - b.datetime);
 }
 
-
-// === Render combined holidays table ===
-function renderCombinedTable(id, holidays) {
-  const el = document.getElementById(id);
-  if (!el) return;
-
-  if (!holidays.length) {
-    el.innerHTML = "<p>No upcoming settlement holidays found.</p>";
-    return;
-  }
-
-  const rows = holidays.map(h => `
-    <tr>
-      <td>${h.jsDate.toLocaleDateString()}</td>
-      <td>${h.region}</td>
-      <td>${h.name}</td>
-    </tr>
-  `).join("");
-
-  el.innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th style="text-align:left;">Date</th>
-          <th style="text-align:left;">Region</th>
-          <th style="text-align:left;">Holiday</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
-}
-
-
-// === Render economic events table ===
+// === RENDER EVENTS TABLE ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
-
   if (!events.length) {
     el.innerHTML = "<p>No upcoming events found.</p>";
     return;
   }
-
   const rows = events.slice(0, limit).map(ev => `
     <tr>
       <td>${ev.datetime.toLocaleString()}</td>
@@ -217,9 +135,7 @@ function renderEventsTable(id, events, limit = 10) {
       <td>${ev.actual}</td>
       <td>${ev.forecast}</td>
       <td>${ev.previous}</td>
-    </tr>
-  `).join("");
-
+    </tr>`).join("");
   el.innerHTML = `
     <table style="font-size:13px;">
       <thead>
@@ -234,17 +150,14 @@ function renderEventsTable(id, events, limit = 10) {
         </tr>
       </thead>
       <tbody>${rows}</tbody>
-    </table>
-  `;
+    </table>`;
 }
 
-// === Main ===
+// === MAIN ===
 async function main() {
   try {
     const csvText = await fetchCSV(CSV_URL);
     const allRows = parseCSV(csvText);
-
-    // Filter for this specific pair (e.g., EUR/USD)
     const pair = allRows.find(r => r.base === BASE && r.quote === QUOTE);
     if (!pair) throw new Error(`${BASE}/${QUOTE} not found in data`);
 
@@ -252,47 +165,31 @@ async function main() {
     document.getElementById("marketRate").textContent = marketRate.toFixed(6);
     document.getElementById("lastUpdate").textContent = pair.time_of_rate || "unknown";
 
-    // === HOLIDAYS (Next 5 for this pair from all data) ===
+    // === HOLIDAYS (just next 5) ===
     const holidays = [];
-
     allRows.forEach(row => {
       [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
         const year = row[`year_${cur}`];
         const month = row[`month_${cur}`];
         const day = row[`day_${cur}`];
         const name = row[`name_${cur}`];
-
-        if (year && month && day && name) {
-          const jsDate = toDate(day, month, year);
-          holidays.push({
-            region: cur.toUpperCase(),
-            jsDate,
-            name
-          });
-        }
+        if (year && month && day && name)
+          holidays.push({ region: cur.toUpperCase(), jsDate: toDate(day, month, year), name });
       });
     });
-
-    // ✅ Filter for *future* holidays only
     const today = new Date();
-    const upcoming = holidays
-      .filter(h => h.jsDate >= today)
-      .sort((a, b) => a.jsDate - b.jsDate)
-      .slice(0, 5);
-
+    const upcoming = holidays.filter(h => h.jsDate >= today).sort((a,b)=>a.jsDate-b.jsDate).slice(0,5);
     renderCombinedTable("combinedHolidays", upcoming);
 
-    // === Fetch and render economic events ===
+    // === EVENTS ===
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
     const events = parseEventsCSV(eventsCSV);
     const now = new Date();
-    const upcomingEvents = events.filter(e => e.datetime > now);
-    renderEventsTable("upcomingEvents", upcomingEvents, 10);
+    renderEventsTable("upcomingEvents", events.filter(e => e.datetime > now), 10);
 
-    // === CALCULATIONS ===
+    // === RECALC ===
     function recalc() {
       const margin = parseFloat(marginSelect.value) || 0;
-
       const useCustom = document.getElementById("useCustomVolume").checked;
       const customVolume = parseFloat(document.getElementById("customVolume").value) || 0;
       const selectedVolume = parseFloat(volumeSelect.value) || 0;
@@ -305,24 +202,29 @@ async function main() {
       document.getElementById("inverseRate").textContent = inverse.toFixed(6);
 
       if (volume > 0) {
-        document.getElementById("exchangeEUR").textContent =
-          `€${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-        document.getElementById("exchangeUSD").textContent =
-          `$${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        const baseSymbol = sym(BASE);
+        const quoteSymbol = sym(QUOTE);
 
+        // Exchange amounts (left column)
+        document.getElementById("exchangeEUR").textContent =
+          `${baseSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        document.getElementById("exchangeUSD").textContent =
+          `${quoteSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+        // Offer amounts (right column)
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
 
         document.getElementById("offerAmount").textContent =
-          offerAmount.toLocaleString(undefined, { style: "currency", currency: "USD" });
+          offerAmount.toLocaleString(undefined, { style: "currency", currency: QUOTE });
         document.getElementById("inverseAmount").textContent =
-          inverseAmount.toLocaleString(undefined, { style: "currency", currency: "EUR" });
+          inverseAmount.toLocaleString(undefined, { style: "currency", currency: BASE });
 
+        // === Expected Trading Revenue (Always in EUR) ===
         const effectiveMargin = margin - 0.00055;
         if (effectiveMargin > 0) {
           const revenueEURUSD = volume * effectiveMargin;
           const revenueUSDEUR = inverseAmount * effectiveMargin;
-
           document.getElementById("revenueEURUSD").textContent =
             revenueEURUSD.toLocaleString(undefined, { style: "currency", currency: "EUR" });
           document.getElementById("revenueUSDEUR").textContent =
@@ -341,7 +243,7 @@ async function main() {
       }
     }
 
-    // === Event Listeners ===
+    // === EVENT LISTENERS ===
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
     document.getElementById("customVolume").addEventListener("input", recalc);
