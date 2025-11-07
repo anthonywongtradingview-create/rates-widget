@@ -232,7 +232,7 @@ async function main() {
 
     function recalc() {
       const margin = parseFloat(marginSelect.value) || 0;
-      const volume = parseFloat(volumeSelect.value) || 0;
+      const volume = parseFloat(volumeSelect.value) || 0; // 👈 This line was missing
       const adjusted = marketRate * (1 - margin);
       const inverse = (1 / marketRate) * (1 - margin);
     
@@ -241,16 +241,22 @@ async function main() {
       document.getElementById("inverseRate").textContent = inverse.toFixed(6);
     
       // Compute offer amounts (volume × rate)
-      const offerAmount = adjusted * volume;
-      const inverseAmount = inverse * volume;
+      if (volume > 0) {
+        const offerAmount = adjusted * volume;
+        const inverseAmount = inverse * volume;
     
-      // Update offer displays (formatted nicely)
-      document.getElementById("offerAmount").textContent = 
-        offerAmount.toLocaleString(undefined, { style: "currency", currency: "USD" });
-      document.getElementById("inverseAmount").textContent = 
-        inverseAmount.toLocaleString(undefined, { style: "currency", currency: "EUR" });
+        // Update offer displays (formatted nicely)
+        document.getElementById("offerAmount").textContent =
+          offerAmount.toLocaleString(undefined, { style: "currency", currency: "USD" });
+        document.getElementById("inverseAmount").textContent =
+          inverseAmount.toLocaleString(undefined, { style: "currency", currency: "EUR" });
+      } else {
+        // Clear if volume not selected
+        document.getElementById("offerAmount").textContent = "–";
+        document.getElementById("inverseAmount").textContent = "–";
+      }
     }
-
+    
     }
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
