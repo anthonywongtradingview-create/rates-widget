@@ -198,30 +198,25 @@ async function main() {
       document.getElementById("offerRate").textContent = adjusted.toFixed(6);
       document.getElementById("inverseRate").textContent = inverse.toFixed(6);
 
-      // === Update Offer Table labels with symbols (new) ===
       const baseSymbol = sym(BASE);
       const quoteSymbol = sym(QUOTE);
-      const offerRows = document.querySelectorAll(".offer-table tbody tr");
-      if (offerRows.length >= 2) {
-        offerRows[0].querySelector("td strong").textContent = `${baseSymbol}>${quoteSymbol}`;
-        offerRows[1].querySelector("td strong").textContent = `${quoteSymbol}>${baseSymbol}`;
-      }
 
       if (volume > 0) {
+        // Left column (For Exchange Amount)
         document.getElementById("exchangeEUR").textContent =
           `${baseSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
         document.getElementById("exchangeUSD").textContent =
           `${quoteSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
+        // Right column (We Can Offer)
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
-
         document.getElementById("offerAmount").textContent =
           offerAmount.toLocaleString(undefined, { style: "currency", currency: QUOTE });
         document.getElementById("inverseAmount").textContent =
           inverseAmount.toLocaleString(undefined, { style: "currency", currency: BASE });
 
-        // === Revenue (always in EUR) ===
+        // === Revenue (always in EUR)
         const effectiveMargin = margin - 0.00055;
         if (effectiveMargin > 0) {
           const revenueEURUSD = volume * effectiveMargin;
