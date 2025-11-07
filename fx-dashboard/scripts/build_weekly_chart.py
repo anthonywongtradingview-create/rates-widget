@@ -9,6 +9,8 @@ Requirements:
 
 Before running:
     1. Publish your Google Sheets as CSV and copy the URLs.
+       - In Google Sheets: File → Share → Publish to web → choose "Comma-separated values (.csv)"
+       - Copy the link for each sheet (PriceData and Events)
     2. Replace the placeholders below with your sheet URLs.
     3. Run: python scripts/build_weekly_chart.py
 """
@@ -16,32 +18,38 @@ Before running:
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import timedelta
+import os
 
 # --------------------------------------------------------------------
 # 🔗 STEP 1: Configure your Google Sheets URLs
 # --------------------------------------------------------------------
-PRICE_DATA_URL = "https://docs.google.com/spreadsheets/d/e/YOUR_PRICE_SHEET_ID/pub?output=csv"
-EVENTS_DATA_URL = "https://docs.google.com/spreadsheets/d/e/YOUR_EVENTS_SHEET_ID/pub?output=csv"
+# 👇 Replace these with your own published CSV URLs
+PRICE_DATA_URL = "https://docs.google.com/spreadsheets/d/e/REPLACE_WITH_YOUR_PRICE_SHEET_ID/pub?output=csv"
+EVENTS_DATA_URL = "https://docs.google.com/spreadsheets/d/e/REPLACE_WITH_YOUR_EVENTS_SHEET_ID/pub?output=csv"
 
 # --------------------------------------------------------------------
 # ⚙️ STEP 2: Load and preprocess data
 # --------------------------------------------------------------------
-print("Loading data from Google Sheets...")
+print("📥 Loading data from Google Sheets...")
 
-# Load price data (expect columns: Pair, Time, Open, High, Low, Close)
-price_df = pd.read_csv(PRICE_DATA_URL, parse_dates=["Time"])
-
-# Load event data (expect columns: Date, Time, Currency, Event, Actual, Forecast, Previous, Impact)
-events_df = pd.read_csv(EVENTS_DATA_URL)
-events_df["Datetime"] = pd.to_datetime(events_df["Date"] + " " + events_df["Time"], errors="coerce")
+try:
+    # Load price data (expect columns: Pair, Time, Open, High, Low, Close)
+    price_df = pd.read_csv(PRICE_DATA_URL, parse_dates=["Time"])
+    # Load event data (expect columns: Date, Time, Currency, Event, Actual, Forecast, Previous, Impact)
+    events_df = pd.read_csv(EVENTS_DATA_URL)
+    events_df["Datetime"] = pd.to_datetime(events_df["Date"] + " " + events_df["Time"], errors="coerce")
+except Exception as e:
+    print("❌ Error loading data. Please check your Google Sheets URLs and column names.")
+    raise e
 
 # --------------------------------------------------------------------
 # 🕒 STEP 3: Filter for the last 7 days
 # --------------------------------------------------------------------
 latest_time = price_df["Time"].max()
 last_week_start = latest_time - timedelta(days=7)
-recent_prices = price_df[price_df["Time"] >= last_week_start]
-recent_events = events_df[events_df["Datetime"] >= last_week_start]
+
+recent_prices = price_df[price_df["Time"] >= last_week_start].copy()
+recent_events = events_df[events_df["Datetime"] >= last_week_start].copy()
 
 # --------------------------------------------------------------------
 # 💹 STEP 4: Function to build annotated chart for a given currency
@@ -52,7 +60,7 @@ def build_chart_for_pair(pair_name: str):
         print(f"⚠️ No data found for {pair_name}. Skipping.")
         return None
 
-    print(f"Building chart for {pair_name}...")
+    print(f"📊 Building chart for {pair_name}...")
 
     fig = go.Figure(data=[go.Candlestick(
         x=df["Time"],
@@ -102,6 +110,8 @@ def build_chart_for_pair(pair_name: str):
 # --------------------------------------------------------------------
 # 🧭 STEP 5: Generate charts for each unique currency pair
 # --------------------------------------------------------------------
+os.makedirs("output", exist_ok=True)
+
 unique_pairs = recent_prices["Pair"].unique()
 
 for pair in unique_pairs:
@@ -111,5 +121,4 @@ for pair in unique_pairs:
         fig.write_html(output_path)
         print(f"✅ Chart saved to {output_path}")
 
-print("All charts generated successfully!")
-
+print("🎉 All charts generated successfully!")
