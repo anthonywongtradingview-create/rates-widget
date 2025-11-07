@@ -231,7 +231,10 @@ async function main() {
 
     function recalc() {
       const margin = parseFloat(marginSelect.value) || 0;
-      const volume = parseFloat(volumeSelect.value) || 0;
+      // Check if user wants to use their own value
+      const useCustom = document.getElementById("useCustomVolume").checked;
+      const customVolume = parseFloat(document.getElementById("customVolume").value) || 0;
+      const volume = useCustom ? customVolume : parseFloat(volumeSelect.value) || 0;
       const adjusted = marketRate * (1 - margin);
       const inverse = (1 / marketRate) * (1 - margin);
     
@@ -263,6 +266,8 @@ async function main() {
     // ✅ These belong inside the try block (after recalc is defined)
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
+    document.getElementById("customVolume").addEventListener("input", recalc);
+    document.getElementById("useCustomVolume").addEventListener("change", recalc);
     recalc();
 
     // Combined holiday table using time_of_rate as reference
