@@ -18,12 +18,21 @@
     </nav>
   </header>
 
+  <div class="panel">
+    <label>Margin (%):
+      <select id="margin"></select>
+    </label>
+    <label>Volume:
+      <select id="volume"></select>
+    </label>
+  </div>
+  
   <div class="info">
     <table class="rates-table">
       <thead>
         <tr>
           <th colspan="2">What we can offer at</th>
-          <th>Market Rate</th>
+          <th>Market Rate: <span id="marketRate">–</span></th>
           <th id="lastUpdate">–</th>
         </tr>
       </thead>
