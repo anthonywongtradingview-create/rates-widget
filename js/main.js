@@ -242,12 +242,18 @@ async function main() {
       document.getElementById("inverseRate").textContent = inverse.toFixed(6);
     
       if (volume > 0) {
+        const useCustom = document.getElementById("useCustomVolume").checked;
+        const customVolume = parseFloat(document.getElementById("customVolume").value) || 0;
+      
+        // Display which value is being used
+        const displayVolume = useCustom ? customVolume : volume;
+      
         // Update the exchange amount cells
-        document.getElementById("exchangeEUR").textContent = 
-          `€${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-        document.getElementById("exchangeUSD").textContent = 
-          `$${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-    
+        document.getElementById("exchangeEUR").textContent =
+          `€${displayVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        document.getElementById("exchangeUSD").textContent =
+          `$${displayVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
     
