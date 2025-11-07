@@ -234,31 +234,27 @@ async function main() {
 
     function recalc() {
       const margin = parseFloat(marginSelect.value) || 0;
-      const volume = parseFloat(volumeSelect.value) || 0; // 👈 This line was missing
+      const volume = parseFloat(volumeSelect.value) || 0;
       const adjusted = marketRate * (1 - margin);
       const inverse = (1 / marketRate) * (1 - margin);
-    
-      // Update displayed rates
+
       document.getElementById("offerRate").textContent = adjusted.toFixed(6);
       document.getElementById("inverseRate").textContent = inverse.toFixed(6);
-    
-      // Compute offer amounts (volume × rate)
+
       if (volume > 0) {
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
-    
-        // Update offer displays (formatted nicely)
         document.getElementById("offerAmount").textContent =
           offerAmount.toLocaleString(undefined, { style: "currency", currency: "USD" });
         document.getElementById("inverseAmount").textContent =
           inverseAmount.toLocaleString(undefined, { style: "currency", currency: "EUR" });
       } else {
-        // Clear if volume not selected
         document.getElementById("offerAmount").textContent = "–";
         document.getElementById("inverseAmount").textContent = "–";
       }
-    
     }
+
+    // ✅ These belong inside the try block (after recalc is defined)
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
     recalc();
@@ -272,10 +268,8 @@ async function main() {
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
     const events = parseEventsCSV(eventsCSV);
 
-    // show only upcoming ones (after current time)
     const now = new Date();
     const upcoming = events.filter(e => e.datetime > now);
-
     renderEventsTable("upcomingEvents", upcoming, 10);
 
   } catch (e) {
