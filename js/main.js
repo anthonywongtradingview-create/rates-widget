@@ -252,23 +252,41 @@ async function main() {
     document.getElementById("marketRate").textContent = marketRate.toFixed(6);
     document.getElementById("lastUpdate").textContent = pair.time_of_rate || "unknown";
 
-    // === HOLIDAYS (Only show for this pair) ===
+    // === HOLIDAYS (Next 5 for this pair from all data) ===
     const holidays = [];
     
-    [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
-      const year = pair[`year_${cur}`];
-      const month = pair[`month_${cur}`];
-      const day = pair[`day_${cur}`];
-      const name = pair[`name_${cur}`];
+    allRows.forEach(row => {
+      // Check each relevant currency (BASE and QUOTE only)
+      [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
+        const year = row[`year_${cur}`];
+        const month = row[`month_${cur}`];
+        const day = row[`day_${cur}`];
+        const name = row[`name_${cur}`];
     
-      if (year && month && day && name) {
-        holidays.push({
-          region: cur.toUpperCase(),
-          jsDate: toDate(day, month, year),
-          name
-        });
-      }
+        if (year && month && day && name) {
+          const jsDate = toDate(day, month, year);
+          holidays.push({
+            region: cur.toUpperCase(),
+            jsDate,
+            name
+          });
+        }
+      });
     });
+    
+    // Filter only upcoming holidays (after today)
+    const today = new Date();
+    const upcoming = holidays.filter(h => h.jsDate >= today);
+    
+    // Sort by soonest
+    upcoming.sort((a, b) => a.jsDate - b.jsDate);
+    
+    // Limit to next 5
+    const combinedNext5 = upcoming.slice(0, 5);
+    
+    // Render them in the table
+    renderCombinedTable("combinedHolidays", combinedNext5);
+
     
     // Sort + show next 5 only
     const combinedNext5 = holidays
