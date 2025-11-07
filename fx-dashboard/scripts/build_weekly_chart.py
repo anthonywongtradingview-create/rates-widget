@@ -25,7 +25,7 @@ import os
 # 🔗 STEP 1: Configure your Google Sheets URLs
 # --------------------------------------------------------------------
 # 👇 Replace these with your actual published CSV URLs
-PRICE_DATA_URL = "https://docs.google.com/spreadsheets/d/e/REPLACE_WITH_YOUR_PRICE_SHEET_ID/pub?output=csv"
+PRICE_DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?output=csv&gid=364957096"
 EVENTS_DATA_URL = "https://docs.google.com/spreadsheets/d/e/REPLACE_WITH_YOUR_EVENTS_SHEET_ID/pub?output=csv"
 
 # --------------------------------------------------------------------
