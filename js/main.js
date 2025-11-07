@@ -252,24 +252,30 @@ async function main() {
     document.getElementById("marketRate").textContent = marketRate.toFixed(6);
     document.getElementById("lastUpdate").textContent = pair.time_of_rate || "unknown";
 
-    // === HOLIDAYS ===
+    // === HOLIDAYS (Only show for this pair) ===
     const holidays = [];
-    ["eur", "usd", "gbp", "chf", "aed"].forEach(cur => {
+    
+    [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
       const year = pair[`year_${cur}`];
       const month = pair[`month_${cur}`];
       const day = pair[`day_${cur}`];
       const name = pair[`name_${cur}`];
-      if (year && month && day && name)
+    
+      if (year && month && day && name) {
         holidays.push({
           region: cur.toUpperCase(),
           jsDate: toDate(day, month, year),
           name
         });
+      }
     });
-
+    
+    // Sort + show next 5 only
     const combinedNext5 = holidays
+      .filter(h => h.jsDate >= new Date()) // future only
       .sort((a, b) => a.jsDate - b.jsDate)
       .slice(0, 5);
+    
     renderCombinedTable("combinedHolidays", combinedNext5);
 
     // === Fetch and render economic events ===
