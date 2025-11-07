@@ -10,7 +10,7 @@ const BASE = window.BASE || "EUR";
 const QUOTE = window.QUOTE || "USD";
 console.log(`✅ Loading data for ${BASE}/${QUOTE}`);
 
-// === Currency symbol map ===
+// === Currency symbols ===
 const currencySymbols = {
   EUR: "€",
   USD: "$",
@@ -21,8 +21,6 @@ const currencySymbols = {
   AUD: "A$",
   CAD: "C$"
 };
-
-// Helper to get symbol (fallback to code)
 function sym(cur) {
   return currencySymbols[cur] || cur;
 }
@@ -60,14 +58,14 @@ function parseCSV(text) {
   });
 }
 
-// === UTIL: Convert "DD-MMM-YYYY" parts to JS Date ===
+// === UTIL: Convert "DD-MMM-YYYY" to JS Date ===
 function toDate(day, monAbbr, year) {
   const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
   const m = months.indexOf(String(monAbbr).toUpperCase());
   return m >= 0 ? new Date(`${year}-${m + 1}-${day}`) : new Date();
 }
 
-// === RENDER HOLIDAYS ===
+// === Render combined holidays table ===
 function renderCombinedTable(id, holidays) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -80,8 +78,7 @@ function renderCombinedTable(id, holidays) {
       <td>${h.jsDate.toLocaleDateString()}</td>
       <td>${h.region}</td>
       <td>${h.name}</td>
-    </tr>
-  `).join("");
+    </tr>`).join("");
   el.innerHTML = `
     <table>
       <thead>
@@ -91,7 +88,7 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === PARSE EVENTS CSV ===
+// === Parse events CSV ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
@@ -118,7 +115,7 @@ function parseEventsCSV(text) {
   }).filter(e => e.datetime).sort((a,b) => a.datetime - b.datetime);
 }
 
-// === RENDER EVENTS TABLE ===
+// === Render economic events table ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -153,7 +150,7 @@ function renderEventsTable(id, events, limit = 10) {
     </table>`;
 }
 
-// === MAIN ===
+// === Main ===
 async function main() {
   try {
     const csvText = await fetchCSV(CSV_URL);
@@ -165,7 +162,7 @@ async function main() {
     document.getElementById("marketRate").textContent = marketRate.toFixed(6);
     document.getElementById("lastUpdate").textContent = pair.time_of_rate || "unknown";
 
-    // === HOLIDAYS (just next 5) ===
+    // === HOLIDAYS ===
     const holidays = [];
     allRows.forEach(row => {
       [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
@@ -187,7 +184,7 @@ async function main() {
     const now = new Date();
     renderEventsTable("upcomingEvents", events.filter(e => e.datetime > now), 10);
 
-    // === RECALC ===
+    // === Recalc ===
     function recalc() {
       const margin = parseFloat(marginSelect.value) || 0;
       const useCustom = document.getElementById("useCustomVolume").checked;
@@ -201,17 +198,21 @@ async function main() {
       document.getElementById("offerRate").textContent = adjusted.toFixed(6);
       document.getElementById("inverseRate").textContent = inverse.toFixed(6);
 
-      if (volume > 0) {
-        const baseSymbol = sym(BASE);
-        const quoteSymbol = sym(QUOTE);
+      // === Update Offer Table labels with symbols (new) ===
+      const baseSymbol = sym(BASE);
+      const quoteSymbol = sym(QUOTE);
+      const offerRows = document.querySelectorAll(".offer-table tbody tr");
+      if (offerRows.length >= 2) {
+        offerRows[0].querySelector("td strong").textContent = `${baseSymbol}>${quoteSymbol}`;
+        offerRows[1].querySelector("td strong").textContent = `${quoteSymbol}>${baseSymbol}`;
+      }
 
-        // Exchange amounts (left column)
+      if (volume > 0) {
         document.getElementById("exchangeEUR").textContent =
           `${baseSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
         document.getElementById("exchangeUSD").textContent =
           `${quoteSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-        // Offer amounts (right column)
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
 
@@ -220,7 +221,7 @@ async function main() {
         document.getElementById("inverseAmount").textContent =
           inverseAmount.toLocaleString(undefined, { style: "currency", currency: BASE });
 
-        // === Expected Trading Revenue (Always in EUR) ===
+        // === Revenue (always in EUR) ===
         const effectiveMargin = margin - 0.00055;
         if (effectiveMargin > 0) {
           const revenueEURUSD = volume * effectiveMargin;
@@ -243,7 +244,7 @@ async function main() {
       }
     }
 
-    // === EVENT LISTENERS ===
+    // === Event listeners ===
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
     document.getElementById("customVolume").addEventListener("input", recalc);
@@ -257,4 +258,3 @@ async function main() {
 }
 
 main();
-
