@@ -51,6 +51,14 @@ function parseCSV(text) {
   return rows;
 }
 
+// === UTIL: Convert "DD-MMM-YYYY" parts to JS Date ===
+function toDate(day, monAbbr, year) {
+  const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const m = months.indexOf(String(monAbbr).toUpperCase());
+  if (m < 0) return new Date(); // fallback if month abbreviation invalid
+  return new Date(`${year}-${m + 1}-${day}`);
+}
+
 
 // === Main ===
 async function main() {
