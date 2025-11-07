@@ -1,1 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FX Dashboard – EUR/AED</title>
+
+  <!-- Shared stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>FX Dashboard – EUR/AED</h1>
+    <nav class="site-nav">
+      <a href="index.html">Home</a>
+      <a href="EURAED.html">EURAED</a>
+      <!-- Add more pages as you create them -->
+    </nav>
+  </header>
+
+  <div class="panel">
+    <label>Margin (%):
+      <select id="margin"></select>
+    </label>
+    <label>Volume:
+      <select id="volume"></select>
+    </label>
+    <label>Or type your exact value here:
+      <input type="number" id="customVolume" placeholder="Enter amount" style="width:120px;" />
+    </label>
+    <label>
+      <input type="checkbox" id="useCustomVolume" />
+      Use exact value?
+    </label>
+  </div>
+
+  <div class="info">
+    <table class="rates-table">
+      <thead>
+        <tr>
+          <th colspan="2">What we can offer at</th>
+          <th>Market Rate: <span id="marketRate">–</span></th>
+          <th id="lastUpdate">–</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EUR&gt;AED</strong></td>
+          <td id="offerRate">–</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>AED&gt;EUR</strong></td>
+          <td id="inverseRate">–</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <table class="offer-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>For Exchange Amount</th>
+          <th>We Can Offer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EUR&gt;AED</strong></td>
+          <td id="exchangeEUR">–</td>
+          <td id="offerAmount">–</td>
+        </tr>
+        <tr>
+          <td><strong>AED&gt;EUR</strong></td>
+          <td id="exchangeUSD">–</td>
+          <td id="inverseAmount">–</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="revenue-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Expected Trading Revenue (Estimates)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EUR&gt;AED</strong></td>
+          <td id="revenueEURUSD">–</td>
+        </tr>
+        <tr>
+          <td><strong>AED&gt;EUR</strong></td>
+          <td id="revenueUSDEUR">–</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Next 5 Settlement Holidays (EUR or AED)</h2>
+  <div id="combinedHolidays"></div>
+
+  <h2>Upcoming Economic Events</h2>
+  <div id="upcomingEvents"></div>
+
+  <!-- Currency Pair Config -->
+  <script>
+    window.BASE = "EUR";
+    window.QUOTE = "AED";
+  </script>
+
+  <!-- Shared JavaScript -->
+  <script src="js/main.js?v=2"></script>
+</body>
+</html>
 
