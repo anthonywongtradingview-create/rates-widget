@@ -25,7 +25,7 @@ body {
   text-decoration: underline;
 }
 
-/* === Panel === */
+/* === Control Panel === */
 .panel {
   background: #f8f8f8;
   padding: 15px;
@@ -41,13 +41,20 @@ select {
   font-size: 14px;
 }
 
-/* === General Table Setup === */
+/* === Info Section (tables container) === */
+.info {
+  max-width: 950px; /* constrains table width */
+  margin: 0 auto;
+}
+
+/* === General Table Rules === */
 table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; /* Prevents column stretching */
+  table-layout: fixed; /* prevents auto-stretching */
   margin-top: 20px;
 }
+
 th,
 td {
   border: 1px solid #ddd;
@@ -55,32 +62,78 @@ td {
   text-align: right;
   white-space: nowrap;
 }
+
 th:first-child,
 td:first-child {
   text-align: left;
-  width: 25%;
+  width: 28%;
 }
 th:nth-child(2),
-td:nth-child(2),
+td:nth-child(2) {
+  width: 24%;
+}
 th:nth-child(3),
-td:nth-child(3),
+td:nth-child(3) {
+  width: 24%;
+}
 th:nth-child(4),
 td:nth-child(4) {
-  width: 25%;
+  width: 24%;
 }
+
 th {
   background: #f0f0f0;
+  font-weight: 600;
 }
+
 .info {
   font-size: 14px;
   margin-top: 8px;
   color: #555;
 }
 
+/* === Table Styles (Google Sheets aesthetic) === */
+
+/* Rates Table */
+.rates-table thead th {
+  background-color: #d8f4d1;
+}
+.rates-table tbody td:first-child {
+  background-color: #e9fbe4;
+  font-weight: bold;
+}
+.rates-table tbody td {
+  background-color: #f5fff5;
+}
+
+/* Offer Table */
+.offer-table thead th {
+  background-color: #9acb7e;
+}
+.offer-table tbody td:first-child {
+  background-color: #e9fbe4;
+  font-weight: bold;
+}
+.offer-table tbody td {
+  background-color: #f5fff5;
+}
+
+/* Revenue Table */
+.revenue-table thead th {
+  background-color: #f7e69e;
+}
+.revenue-table tbody td:first-child {
+  background-color: #fff9d6;
+  font-weight: bold;
+}
+.revenue-table tbody td {
+  background-color: #fffef0;
+}
+
 /* === Combined Holidays Table === */
 #combinedHolidays {
   max-width: 600px;
-  margin-top: 10px;
+  margin: 20px auto;
 }
 #combinedHolidays table {
   width: 100%;
@@ -98,20 +151,11 @@ th {
 #combinedHolidays th {
   background: #f0f0f0;
 }
-#combinedHolidays td:nth-child(1) {
-  width: 30%;
-}
-#combinedHolidays td:nth-child(2) {
-  width: 20%;
-}
-#combinedHolidays td:nth-child(3) {
-  width: 50%;
-}
 
 /* === Upcoming Events Table === */
 #upcomingEvents {
-  max-width: 800px;
-  margin-top: 10px;
+  max-width: 950px;
+  margin: 20px auto;
   overflow-x: auto;
 }
 #upcomingEvents table {
@@ -131,85 +175,12 @@ th {
 #upcomingEvents th {
   background: #f0f0f0;
 }
-#upcomingEvents td:nth-child(1) {
-  width: 22%;
-}
-#upcomingEvents td:nth-child(2) {
-  width: 10%;
-}
-#upcomingEvents td:nth-child(3) {
-  width: 10%;
-}
-#upcomingEvents td:nth-child(4) {
-  width: 28%;
-}
-#upcomingEvents td:nth-child(5),
-#upcomingEvents td:nth-child(6),
-#upcomingEvents td:nth-child(7) {
-  width: 10%;
-}
 
-/* === Offer & Rate Tables (Google Sheets style) === */
+/* === Optional Polish === */
 .rates-table,
 .offer-table,
 .revenue-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 14px;
-  text-align: center;
-  table-layout: fixed; /* ensures consistent column widths */
-}
-
-/* Borders + spacing */
-.rates-table th,
-.rates-table td,
-.offer-table th,
-.offer-table td,
-.revenue-table th,
-.revenue-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-}
-
-/* === Rates Table === */
-.rates-table thead th {
-  background-color: #d8f4d1; /* light green header */
-  font-weight: bold;
-}
-.rates-table tbody td:first-child {
-  background-color: #e9fbe4; /* light green side cells */
-  font-weight: bold;
-  text-align: left;
-}
-.rates-table tbody td {
-  background-color: #f5fff5;
-}
-
-/* === Offer Table === */
-.offer-table thead th {
-  background-color: #9acb7e; /* darker green header */
-  font-weight: bold;
-}
-.offer-table tbody td:first-child {
-  background-color: #e9fbe4;
-  font-weight: bold;
-  text-align: left;
-}
-.offer-table tbody td {
-  background-color: #f5fff5;
-}
-
-/* === Revenue Table === */
-.revenue-table thead th {
-  background-color: #f7e69e; /* light yellow header */
-  font-weight: bold;
-}
-.revenue-table tbody td:first-child {
-  background-color: #fff9d6; /* light yellow left column */
-  font-weight: bold;
-  text-align: left;
-}
-.revenue-table tbody td {
-  background-color: #fffef0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
