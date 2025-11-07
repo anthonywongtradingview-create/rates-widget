@@ -254,15 +254,14 @@ async function main() {
 
     // === HOLIDAYS (Next 5 for this pair from all data) ===
     const holidays = [];
-    
+
     allRows.forEach(row => {
-      // Check each relevant currency (BASE and QUOTE only)
       [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
         const year = row[`year_${cur}`];
         const month = row[`month_${cur}`];
         const day = row[`day_${cur}`];
         const name = row[`name_${cur}`];
-    
+
         if (year && month && day && name) {
           const jsDate = toDate(day, month, year);
           holidays.push({
@@ -273,41 +272,27 @@ async function main() {
         }
       });
     });
-    
-    // Filter only upcoming holidays (after today)
-    const today = new Date();
-    const upcoming = holidays.filter(h => h.jsDate >= today);
-    
-    // Sort by soonest
-    upcoming.sort((a, b) => a.jsDate - b.jsDate);
-    
-    // Limit to next 5
-    const combinedNext5 = upcoming.slice(0, 5);
-    
-    // Render them in the table
-    renderCombinedTable("combinedHolidays", combinedNext5);
 
-    
-    // Sort + show next 5 only
-    const combinedNext5 = holidays
-      .filter(h => h.jsDate >= new Date()) // future only
+    // ✅ Filter for *future* holidays only
+    const today = new Date();
+    const upcoming = holidays
+      .filter(h => h.jsDate >= today)
       .sort((a, b) => a.jsDate - b.jsDate)
       .slice(0, 5);
-    
-    renderCombinedTable("combinedHolidays", combinedNext5);
+
+    renderCombinedTable("combinedHolidays", upcoming);
 
     // === Fetch and render economic events ===
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
     const events = parseEventsCSV(eventsCSV);
     const now = new Date();
-    const upcoming = events.filter(e => e.datetime > now);
-    renderEventsTable("upcomingEvents", upcoming, 10);
+    const upcomingEvents = events.filter(e => e.datetime > now);
+    renderEventsTable("upcomingEvents", upcomingEvents, 10);
 
-    // === Calculations ===
+    // === CALCULATIONS ===
     function recalc() {
       const margin = parseFloat(marginSelect.value) || 0;
 
-      // Check if user wants to use their own value
       const useCustom = document.getElementById("useCustomVolume").checked;
       const customVolume = parseFloat(document.getElementById("customVolume").value) || 0;
       const selectedVolume = parseFloat(volumeSelect.value) || 0;
@@ -320,7 +305,6 @@ async function main() {
       document.getElementById("inverseRate").textContent = inverse.toFixed(6);
 
       if (volume > 0) {
-        // Update exchange amount cells
         document.getElementById("exchangeEUR").textContent =
           `€${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
         document.getElementById("exchangeUSD").textContent =
@@ -334,8 +318,7 @@ async function main() {
         document.getElementById("inverseAmount").textContent =
           inverseAmount.toLocaleString(undefined, { style: "currency", currency: "EUR" });
 
-        // === Calculate expected trading revenue (Estimates)
-        const effectiveMargin = margin - 0.00055; // margin minus 0.055%
+        const effectiveMargin = margin - 0.00055;
         if (effectiveMargin > 0) {
           const revenueEURUSD = volume * effectiveMargin;
           const revenueUSDEUR = inverseAmount * effectiveMargin;
@@ -358,7 +341,7 @@ async function main() {
       }
     }
 
-    // === Event listeners ===
+    // === Event Listeners ===
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
     document.getElementById("customVolume").addEventListener("input", recalc);
