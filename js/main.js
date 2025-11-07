@@ -208,13 +208,20 @@ async function main() {
         document.getElementById("exchangeUSD").textContent =
           `${quoteSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-        // Right column (We Can Offer)
+        // Right column (We Can Offer) — manual formatting with symbols
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
+
         document.getElementById("offerAmount").textContent =
-          offerAmount.toLocaleString(undefined, { style: "currency", currency: QUOTE });
+          `${quoteSymbol}${offerAmount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}`;
         document.getElementById("inverseAmount").textContent =
-          inverseAmount.toLocaleString(undefined, { style: "currency", currency: BASE });
+          `${baseSymbol}${inverseAmount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}`;
 
         // === Revenue (always in EUR)
         const effectiveMargin = margin - 0.00055;
@@ -253,3 +260,4 @@ async function main() {
 }
 
 main();
+
