@@ -131,6 +131,113 @@ function renderEventsTable(id, events, limit = 10) {
   `;
 }
 
+// === Parse events CSV ===
+function parseEventsCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
+  const idx = {
+    datetime: header.indexOf("date_and_time"),
+    currency: header.indexOf("currency"),
+    importance: header.indexOf("importance"),
+    event: header.indexOf("event"),
+    actual: header.indexOf("actual"),
+    forecast: header.indexOf("forecast"),
+    previous: header.indexOf("previous")
+  };
+
+  const events = [];
+
+  for (const line of lines) {
+    const cols = line.split(",").map(c => c.replace(/^"|"$/g, '').trim());
+    if (cols[idx.datetime] && cols[idx.currency]) {
+      events.push({
+        datetime: new Date(cols[idx.datetime]),
+        currency: cols[idx.currency],
+        importance: cols[idx.importance] || "",
+        event: cols[idx.event] || "",
+        actual: cols[idx.actual] || "",
+        forecast: cols[idx.forecast] || "",
+        previous: cols[idx.previous] || ""
+      });
+    }
+  }
+  return events.sort((a, b) => a.datetime - b.datetime);
+}
+
+
+// === Render combined holidays table ===
+function renderCombinedTable(id, holidays) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  if (!holidays.length) {
+    el.innerHTML = "<p>No upcoming settlement holidays found.</p>";
+    return;
+  }
+
+  const rows = holidays.map(h => `
+    <tr>
+      <td>${h.jsDate.toLocaleDateString()}</td>
+      <td>${h.region}</td>
+      <td>${h.name}</td>
+    </tr>
+  `).join("");
+
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align:left;">Date</th>
+          <th style="text-align:left;">Region</th>
+          <th style="text-align:left;">Holiday</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+
+// === Render economic events table ===
+function renderEventsTable(id, events, limit = 10) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  if (!events.length) {
+    el.innerHTML = "<p>No upcoming events found.</p>";
+    return;
+  }
+
+  const rows = events.slice(0, limit).map(ev => `
+    <tr>
+      <td>${ev.datetime.toLocaleString()}</td>
+      <td>${ev.currency}</td>
+      <td>${ev.importance}</td>
+      <td>${ev.event}</td>
+      <td>${ev.actual}</td>
+      <td>${ev.forecast}</td>
+      <td>${ev.previous}</td>
+    </tr>
+  `).join("");
+
+  el.innerHTML = `
+    <table style="font-size:13px;">
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Currency</th>
+          <th>Importance</th>
+          <th>Event</th>
+          <th>Actual</th>
+          <th>Forecast</th>
+          <th>Previous</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
 // === Main ===
 async function main() {
   try {
