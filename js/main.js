@@ -59,6 +59,37 @@ function toDate(day, monAbbr, year) {
   return new Date(`${year}-${m + 1}-${day}`);
 }
 
+// === Render combined holidays table ===
+function renderCombinedTable(id, holidays) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  if (!holidays.length) {
+    el.innerHTML = "<p>No upcoming settlement holidays found.</p>";
+    return;
+  }
+
+  const rows = holidays.map(h => `
+    <tr>
+      <td>${h.jsDate.toLocaleDateString()}</td>
+      <td>${h.region}</td>
+      <td>${h.name}</td>
+    </tr>
+  `).join("");
+
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align:left;">Date</th>
+          <th style="text-align:left;">Region</th>
+          <th style="text-align:left;">Holiday</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
 
 // === Main ===
 async function main() {
