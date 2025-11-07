@@ -1,4 +1,4 @@
-/* Base */
+/* === Base === */
 body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background: #fff;
@@ -7,133 +7,209 @@ body {
   padding: 20px;
 }
 
-/* Header + Nav */
-.site-header { margin-bottom: 16px; }
-.site-header h1 { font-size: 20px; margin: 0 0 8px; }
+/* === Header + Nav === */
+.site-header {
+  margin-bottom: 16px;
+}
+.site-header h1 {
+  font-size: 20px;
+  margin: 0 0 8px;
+}
 .site-nav a {
   display: inline-block;
   margin-right: 12px;
   text-decoration: none;
   color: #0a58ca;
 }
-.site-nav a:hover { text-decoration: underline; }
+.site-nav a:hover {
+  text-decoration: underline;
+}
 
-/* Panel */
+/* === Panel === */
 .panel {
   background: #f8f8f8;
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
 }
+label {
+  display: inline-block;
+  margin-right: 12px;
+}
+select {
+  padding: 6px 10px;
+  font-size: 14px;
+}
 
-label { display: inline-block; margin-right: 12px; }
-select { padding: 6px 10px; font-size: 14px; }
-
-/* Tables (general) */
+/* === General Table Setup === */
 table {
-  border-collapse: collapse;
   width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Prevents column stretching */
   margin-top: 20px;
 }
-th, td {
+th,
+td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 8px 10px;
   text-align: right;
+  white-space: nowrap;
 }
-th:first-child, td:first-child { text-align: left; }
-th { background: #f0f0f0; }
-.info { font-size: 14px; margin-top: 8px; color: #555; }
-
-/* Combined Holidays */
-#combinedHolidays { max-width: 500px; margin-top: 10px; }
-#combinedHolidays table { width: 100%; border-collapse: collapse; font-size: 13px; }
-#combinedHolidays th, #combinedHolidays td {
-  border: 1px solid #ddd; padding: 6px 8px; text-align: left; word-wrap: break-word;
+th:first-child,
+td:first-child {
+  text-align: left;
+  width: 25%;
 }
-#combinedHolidays th { background: #f0f0f0; }
-#combinedHolidays td:nth-child(1) { width: 30%; }
-#combinedHolidays td:nth-child(2) { width: 20%; }
-#combinedHolidays td:nth-child(3) { width: 50%; }
-
-/* Upcoming Events (compact) */
-#upcomingEvents { max-width: 800px; margin-top: 10px; overflow-x: auto; }
-#upcomingEvents table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-#upcomingEvents th, #upcomingEvents td {
-  border: 1px solid #ddd; padding: 6px 8px; text-align: left; word-wrap: break-word; white-space: normal;
+th:nth-child(2),
+td:nth-child(2),
+th:nth-child(3),
+td:nth-child(3),
+th:nth-child(4),
+td:nth-child(4) {
+  width: 25%;
 }
-#upcomingEvents th { background: #f0f0f0; }
-#upcomingEvents td:nth-child(1) { width: 22%; } /* Date & Time */
-#upcomingEvents td:nth-child(2) { width: 10%; } /* Currency */
-#upcomingEvents td:nth-child(3) { width: 10%; } /* Importance */
-#upcomingEvents td:nth-child(4) { width: 28%; } /* Event */
-#upcomingEvents td:nth-child(5),
-#upcomingEvents td:nth-child(6),
-#upcomingEvents td:nth-child(7) { width: 10%; } /* Actual / Forecast / Previous */
+th {
+  background: #f0f0f0;
+}
+.info {
+  font-size: 14px;
+  margin-top: 8px;
+  color: #555;
+}
 
-/* Offer Tables (styled like Google Sheets) */
-.rates-table, .offer-table {
+/* === Combined Holidays Table === */
+#combinedHolidays {
+  max-width: 600px;
+  margin-top: 10px;
+}
+#combinedHolidays table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 14px;
-  text-align: center;
+  font-size: 13px;
+  table-layout: fixed;
 }
-
-.rates-table th,
-.rates-table td,
-.offer-table th,
-.offer-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-}
-
-.rates-table thead th {
-  background-color: #d8f4d1; /* light green header */
-  font-weight: bold;
-}
-
-.offer-table thead th {
-  background-color: #9acb7e; /* darker green section header */
-  font-weight: bold;
-}
-
-.rates-table tbody td:first-child,
-.offer-table tbody td:first-child {
-  background-color: #e9fbe4; /* light green side cells */
-  font-weight: bold;
+#combinedHolidays th,
+#combinedHolidays td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
   text-align: left;
+  word-wrap: break-word;
+}
+#combinedHolidays th {
+  background: #f0f0f0;
+}
+#combinedHolidays td:nth-child(1) {
+  width: 30%;
+}
+#combinedHolidays td:nth-child(2) {
+  width: 20%;
+}
+#combinedHolidays td:nth-child(3) {
+  width: 50%;
 }
 
-.rates-table tbody td,
-.offer-table tbody td {
-  background-color: #f5fff5;
+/* === Upcoming Events Table === */
+#upcomingEvents {
+  max-width: 800px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+#upcomingEvents table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+}
+#upcomingEvents th,
+#upcomingEvents td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: left;
+  word-wrap: break-word;
+  white-space: normal;
+}
+#upcomingEvents th {
+  background: #f0f0f0;
+}
+#upcomingEvents td:nth-child(1) {
+  width: 22%;
+}
+#upcomingEvents td:nth-child(2) {
+  width: 10%;
+}
+#upcomingEvents td:nth-child(3) {
+  width: 10%;
+}
+#upcomingEvents td:nth-child(4) {
+  width: 28%;
+}
+#upcomingEvents td:nth-child(5),
+#upcomingEvents td:nth-child(6),
+#upcomingEvents td:nth-child(7) {
+  width: 10%;
 }
 
+/* === Offer & Rate Tables (Google Sheets style) === */
+.rates-table,
+.offer-table,
 .revenue-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
   font-size: 14px;
   text-align: center;
+  table-layout: fixed; /* ensures consistent column widths */
 }
 
+/* Borders + spacing */
+.rates-table th,
+.rates-table td,
+.offer-table th,
+.offer-table td,
 .revenue-table th,
 .revenue-table td {
   border: 1px solid #ccc;
   padding: 8px;
 }
 
+/* === Rates Table === */
+.rates-table thead th {
+  background-color: #d8f4d1; /* light green header */
+  font-weight: bold;
+}
+.rates-table tbody td:first-child {
+  background-color: #e9fbe4; /* light green side cells */
+  font-weight: bold;
+  text-align: left;
+}
+.rates-table tbody td {
+  background-color: #f5fff5;
+}
+
+/* === Offer Table === */
+.offer-table thead th {
+  background-color: #9acb7e; /* darker green header */
+  font-weight: bold;
+}
+.offer-table tbody td:first-child {
+  background-color: #e9fbe4;
+  font-weight: bold;
+  text-align: left;
+}
+.offer-table tbody td {
+  background-color: #f5fff5;
+}
+
+/* === Revenue Table === */
 .revenue-table thead th {
   background-color: #f7e69e; /* light yellow header */
   font-weight: bold;
 }
-
 .revenue-table tbody td:first-child {
-  background-color: #fff9d6; /* lighter yellow left cells */
+  background-color: #fff9d6; /* light yellow left column */
   font-weight: bold;
   text-align: left;
 }
-
 .revenue-table tbody td {
   background-color: #fffef0;
 }
