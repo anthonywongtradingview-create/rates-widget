@@ -229,45 +229,63 @@ async function main() {
     document.getElementById("marketRate").textContent = marketRate.toFixed(6);
     document.getElementById("lastUpdate").textContent = pair.time || "unknown";
 
-    function recalc() {
-      const margin = parseFloat(marginSelect.value) || 0;
-      // Check if user wants to use their own value
-      const useCustom = document.getElementById("useCustomVolume").checked;
-      const customVolume = parseFloat(document.getElementById("customVolume").value) || 0;
-      const volume = useCustom ? customVolume : parseFloat(volumeSelect.value) || 0;
-      const adjusted = marketRate * (1 - margin);
-      const inverse = (1 / marketRate) * (1 - margin);
-    
-      document.getElementById("offerRate").textContent = adjusted.toFixed(6);
-      document.getElementById("inverseRate").textContent = inverse.toFixed(6);
-    
-      if (volume > 0) {
-        const useCustom = document.getElementById("useCustomVolume").checked;
-        const customVolume = parseFloat(document.getElementById("customVolume").value) || 0;
-      
-        // Display which value is being used
-        const displayVolume = useCustom ? customVolume : volume;
-      
-        // Update the exchange amount cells
-        document.getElementById("exchangeEUR").textContent =
-          `€${displayVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-        document.getElementById("exchangeUSD").textContent =
-          `$${displayVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-
-        const offerAmount = adjusted * volume;
-        const inverseAmount = inverse * volume;
-    
-        document.getElementById("offerAmount").textContent =
-          offerAmount.toLocaleString(undefined, { style: "currency", currency: "USD" });
-        document.getElementById("inverseAmount").textContent =
-          inverseAmount.toLocaleString(undefined, { style: "currency", currency: "EUR" });
+  function recalc() {
+    const margin = parseFloat(marginSelect.value) || 0;
+  
+    // Check if user wants to use their own value
+    const useCustom = document.getElementById("useCustomVolume").checked;
+    const customVolume = parseFloat(document.getElementById("customVolume").value) || 0;
+    const selectedVolume = parseFloat(volumeSelect.value) || 0;
+    const volume = useCustom ? customVolume : selectedVolume;
+  
+    const adjusted = marketRate * (1 - margin);
+    const inverse = (1 / marketRate) * (1 - margin);
+  
+    document.getElementById("offerRate").textContent = adjusted.toFixed(6);
+    document.getElementById("inverseRate").textContent = inverse.toFixed(6);
+  
+    if (volume > 0) {
+      // Update exchange amount cells
+      document.getElementById("exchangeEUR").textContent =
+        `€${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+      document.getElementById("exchangeUSD").textContent =
+        `$${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  
+      const offerAmount = adjusted * volume;
+      const inverseAmount = inverse * volume;
+  
+      document.getElementById("offerAmount").textContent =
+        offerAmount.toLocaleString(undefined, { style: "currency", currency: "USD" });
+      document.getElementById("inverseAmount").textContent =
+        inverseAmount.toLocaleString(undefined, { style: "currency", currency: "EUR" });
+  
+      // === Calculate expected trading revenue (Estimates)
+      const effectiveMargin = margin - 0.00055; // margin minus 0.055%
+      if (effectiveMargin > 0) {
+        // Revenue for EUR>USD = Exchange amount in euros × effective margin
+        const revenueEURUSD = volume * effectiveMargin;
+  
+        // Revenue for USD>EUR = Offer in euros × effective margin
+        const revenueUSDEUR = inverseAmount * effectiveMargin;
+  
+        document.getElementById("revenueEURUSD").textContent =
+          revenueEURUSD.toLocaleString(undefined, { style: "currency", currency: "EUR" });
+        document.getElementById("revenueUSDEUR").textContent =
+          revenueUSDEUR.toLocaleString(undefined, { style: "currency", currency: "EUR" });
       } else {
-        document.getElementById("exchangeEUR").textContent = "–";
-        document.getElementById("exchangeUSD").textContent = "–";
-        document.getElementById("offerAmount").textContent = "–";
-        document.getElementById("inverseAmount").textContent = "–";
+        document.getElementById("revenueEURUSD").textContent = "–";
+        document.getElementById("revenueUSDEUR").textContent = "–";
       }
+    } else {
+      // Reset all fields if volume is 0 or empty
+      document.getElementById("exchangeEUR").textContent = "–";
+      document.getElementById("exchangeUSD").textContent = "–";
+      document.getElementById("offerAmount").textContent = "–";
+      document.getElementById("inverseAmount").textContent = "–";
+      document.getElementById("revenueEURUSD").textContent = "–";
+      document.getElementById("revenueUSDEUR").textContent = "–";
     }
+  }
 
     // ✅ These belong inside the try block (after recalc is defined)
     marginSelect.addEventListener("change", recalc);
