@@ -70,3 +70,41 @@ th { background: #f0f0f0; }
 #upcomingEvents td:nth-child(6),
 #upcomingEvents td:nth-child(7) { width: 10%; } /* Actual / Forecast / Previous */
 
+/* Offer Tables (styled like Google Sheets) */
+.rates-table, .offer-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.rates-table th,
+.rates-table td,
+.offer-table th,
+.offer-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.rates-table thead th {
+  background-color: #c7f0c3; /* light green header */
+  font-weight: bold;
+}
+
+.offer-table thead th {
+  background-color: #99d698; /* darker green section header */
+  font-weight: bold;
+}
+
+.rates-table tbody td:first-child,
+.offer-table tbody td:first-child {
+  background-color: #e7f8e6; /* light green side cells */
+  font-weight: bold;
+  text-align: left;
+}
+
+.rates-table tbody td,
+.offer-table tbody td {
+  background-color: #f5fff5;
+}
