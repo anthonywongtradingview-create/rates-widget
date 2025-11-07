@@ -257,7 +257,6 @@ async function main() {
         document.getElementById("offerAmount").textContent = "–";
         document.getElementById("inverseAmount").textContent = "–";
       }
-    }
     
     }
     marginSelect.addEventListener("change", recalc);
