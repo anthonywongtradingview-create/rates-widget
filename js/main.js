@@ -236,6 +236,15 @@ async function main() {
       const inverse = (1 / marketRate) * (1 - margin);
       document.getElementById("offerRate").textContent = adjusted.toFixed(6);
       document.getElementById("inverseRate").textContent = inverse.toFixed(6);
+       // Compute offer amounts (volume × rate)
+      const offerAmount = adjusted * volume;
+      const inverseAmount = inverse * volume;
+      // Update offer displays (formatted nicely)
+      document.getElementById("offerAmount").textContent = 
+        offerAmount.toLocaleString(undefined, { style: "currency", currency: "USD" });
+      document.getElementById("inverseAmount").textContent = 
+        inverseAmount.toLocaleString(undefined, { style: "currency", currency: "EUR" });
+    }
     }
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
