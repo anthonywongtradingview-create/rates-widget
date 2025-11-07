@@ -88,18 +88,18 @@ th { background: #f0f0f0; }
 }
 
 .rates-table thead th {
-  background-color: #c7f0c3; /* light green header */
+  background-color: #d8f4d1; /* light green header */
   font-weight: bold;
 }
 
 .offer-table thead th {
-  background-color: #99d698; /* darker green section header */
+  background-color: #9acb7e; /* darker green section header */
   font-weight: bold;
 }
 
 .rates-table tbody td:first-child,
 .offer-table tbody td:first-child {
-  background-color: #e7f8e6; /* light green side cells */
+  background-color: #e9fbe4; /* light green side cells */
   font-weight: bold;
   text-align: left;
 }
