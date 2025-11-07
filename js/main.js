@@ -234,18 +234,27 @@ async function main() {
       const volume = parseFloat(volumeSelect.value) || 0;
       const adjusted = marketRate * (1 - margin);
       const inverse = (1 / marketRate) * (1 - margin);
-
+    
       document.getElementById("offerRate").textContent = adjusted.toFixed(6);
       document.getElementById("inverseRate").textContent = inverse.toFixed(6);
-
+    
       if (volume > 0) {
+        // Update the exchange amount cells
+        document.getElementById("exchangeEUR").textContent = 
+          `€${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        document.getElementById("exchangeUSD").textContent = 
+          `$${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+    
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
+    
         document.getElementById("offerAmount").textContent =
           offerAmount.toLocaleString(undefined, { style: "currency", currency: "USD" });
         document.getElementById("inverseAmount").textContent =
           inverseAmount.toLocaleString(undefined, { style: "currency", currency: "EUR" });
       } else {
+        document.getElementById("exchangeEUR").textContent = "–";
+        document.getElementById("exchangeUSD").textContent = "–";
         document.getElementById("offerAmount").textContent = "–";
         document.getElementById("inverseAmount").textContent = "–";
       }
