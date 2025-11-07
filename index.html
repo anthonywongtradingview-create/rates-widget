@@ -18,22 +18,55 @@
     </nav>
   </header>
 
-  <div class="panel">
-    <label>Margin (%):
-      <select id="margin"></select>
-    </label>
-    <label>Volume:
-      <select id="volume"></select>
-    </label>
-    <div class="info">
-      <strong>Market Rate:</strong> <span id="marketRate">Loading...</span><br/>
-      <strong>We can offer EUR > USD at:</strong> <span id="offerRate">–</span><br/>
-      <strong>We can offer USD > EUR at:</strong> <span id="inverseRate">–</span><br/>
-      <strong>We can offer EUR > USD:</strong> <span id="offerAmount">–</span><br/>
-      <strong>We can offer USD > EUR:</strong> <span id="inverseAmount">–</span><br/>
-      <strong>Rate value at:</strong> <span id="lastUpdate">–</span>
-    </div>
+  <div class="info">
+    <table class="rates-table">
+      <thead>
+        <tr>
+          <th colspan="3">What we can offer at</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th>Market Rate</th>
+          <th id="lastUpdate">–</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EUR&gt;USD</strong></td>
+          <td id="offerRate">–</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>USD&gt;EUR</strong></td>
+          <td id="inverseRate">–</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <table class="offer-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>For Exchange Amount</th>
+          <th>We Can Offer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EUR&gt;USD</strong></td>
+          <td id="exchangeEUR">–</td>
+          <td id="offerAmount">–</td>
+        </tr>
+        <tr>
+          <td><strong>USD&gt;EUR</strong></td>
+          <td id="exchangeUSD">–</td>
+          <td id="inverseAmount">–</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+
 
   <h2>Next 5 Settlement Holidays (EUR or USD)</h2>
   <div id="combinedHolidays"></div>
