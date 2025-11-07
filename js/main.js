@@ -1,6 +1,3 @@
-console.log("✅ main.js loaded");
-console.log("margin:", margin, "volume:", volume, "adjusted:", adjusted, "inverse:", inverse);
-
 
 // === CONFIG ===
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=0&single=true&output=csv";
