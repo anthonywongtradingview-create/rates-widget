@@ -267,14 +267,14 @@ h2 {
   justify-content: center;    /* ✅ center horizontally */
   align-items: center;        /* ✅ center vertically */
   gap: 3px;
-  width: 50px;                /* ✅ total bar width */
+  width: 120px;                /* ✅ total bar width */
   margin: 0 auto;             /* ensures centering in table cell */
   height: 14px;
 }
 
 .importance-blocks span {
   display: inline-block;
-  width: 16px;                /* roughly 1/3 of 50px width */
+  width: 40px;                /* roughly 1/3 of 50px width */
   height: 10px;
   border-radius: 3px;
 }
