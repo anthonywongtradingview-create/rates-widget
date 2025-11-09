@@ -88,7 +88,7 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === Parse events CSV ===
+// === Parse events CSV (with Insights column only) ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
@@ -97,9 +97,7 @@ function parseEventsCSV(text) {
     currency: header.indexOf("currency"),
     importance: header.indexOf("importance"),
     event: header.indexOf("event"),
-    actual: header.indexOf("actual"),
-    forecast: header.indexOf("forecast"),
-    previous: header.indexOf("previous")
+    insights: header.indexOf("insights") // ✅ Only one extra column
   };
   return lines.map(line => {
     const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
@@ -108,14 +106,12 @@ function parseEventsCSV(text) {
       currency: cols[idx.currency],
       importance: cols[idx.importance],
       event: cols[idx.event],
-      actual: cols[idx.actual],
-      forecast: cols[idx.forecast],
-      previous: cols[idx.previous]
+      insights: cols[idx.insights] || ""
     };
   }).filter(e => e.datetime).sort((a,b) => a.datetime - b.datetime);
 }
 
-// === Render economic events table ===
+// === Render economic events table (with Insights button only) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -123,16 +119,22 @@ function renderEventsTable(id, events, limit = 10) {
     el.innerHTML = "<p>No upcoming events found.</p>";
     return;
   }
-  const rows = events.slice(0, limit).map(ev => `
-    <tr>
-      <td>${ev.datetime.toLocaleString()}</td>
-      <td>${ev.currency}</td>
-      <td>${ev.importance}</td>
-      <td>${ev.event}</td>
-      <td>${ev.actual}</td>
-      <td>${ev.forecast}</td>
-      <td>${ev.previous}</td>
-    </tr>`).join("");
+
+  const rows = events.slice(0, limit).map(ev => {
+    const insightsButton = ev.insights
+      ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
+      : "";
+
+    return `
+      <tr>
+        <td>${ev.datetime.toLocaleString()}</td>
+        <td>${ev.currency}</td>
+        <td>${ev.importance}</td>
+        <td>${ev.event}</td>
+        <td>${insightsButton}</td>
+      </tr>`;
+  }).join("");
+
   el.innerHTML = `
     <table style="font-size:13px;">
       <thead>
@@ -141,9 +143,7 @@ function renderEventsTable(id, events, limit = 10) {
           <th>Currency</th>
           <th>Importance</th>
           <th>Event</th>
-          <th>Actual</th>
-          <th>Forecast</th>
-          <th>Previous</th>
+          <th>Insights</th> <!-- ✅ Only one new column -->
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -219,13 +219,11 @@ async function main() {
       const quoteSymbol = sym(QUOTE);
 
       if (volume > 0) {
-        // Left column (For Exchange Amount)
         document.getElementById("exchangeEUR").textContent =
           `${baseSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
         document.getElementById("exchangeUSD").textContent =
           `${quoteSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-        // Right column (We Can Offer) — manual formatting with symbols
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
 
@@ -239,31 +237,14 @@ async function main() {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           })}`;
-
-        // === Revenue (always in EUR)
-        const effectiveMargin = margin - 0.00055;
-        if (effectiveMargin > 0) {
-          const revenueEURUSD = volume * effectiveMargin;
-          const revenueUSDEUR = inverseAmount * effectiveMargin;
-          document.getElementById("revenueEURUSD").textContent =
-            revenueEURUSD.toLocaleString(undefined, { style: "currency", currency: "EUR" });
-          document.getElementById("revenueUSDEUR").textContent =
-            revenueUSDEUR.toLocaleString(undefined, { style: "currency", currency: "EUR" });
-        } else {
-          document.getElementById("revenueEURUSD").textContent = "–";
-          document.getElementById("revenueUSDEUR").textContent = "–";
-        }
       } else {
         document.getElementById("exchangeEUR").textContent = "–";
         document.getElementById("exchangeUSD").textContent = "–";
         document.getElementById("offerAmount").textContent = "–";
         document.getElementById("inverseAmount").textContent = "–";
-        document.getElementById("revenueEURUSD").textContent = "–";
-        document.getElementById("revenueUSDEUR").textContent = "–";
       }
     }
 
-    // === Event listeners ===
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
     document.getElementById("customVolume").addEventListener("input", recalc);
