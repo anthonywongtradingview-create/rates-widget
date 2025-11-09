@@ -48,7 +48,7 @@ async function fetchCSV(url) {
   return await res.text();
 }
 
-// === PARSE CSV (for the main FX sheet) ===
+// === PARSE CSV (for FX main sheet) ===
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
@@ -88,40 +88,40 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === Parse events CSV (simple + adds Insights) ===
+// === Parse events CSV (now includes Insights) ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
-
   const idx = {
     datetime: header.indexOf("date_and_time"),
     currency: header.indexOf("currency"),
     importance: header.indexOf("importance"),
     event: header.indexOf("event"),
-    insights: header.indexOf("insights")
+    actual: header.indexOf("actual"),
+    forecast: header.indexOf("forecast"),
+    previous: header.indexOf("previous"),
+    insights: header.indexOf("insights") // ✅ new column
   };
-
-  console.log("Event header columns:", header);
-  console.log("Index map:", idx);
 
   return lines
     .map(line => {
       const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
-      const datetime = new Date(cols[idx.datetime]);
-
       return {
-        datetime,
+        datetime: new Date(cols[idx.datetime]),
         currency: cols[idx.currency],
         importance: cols[idx.importance],
         event: cols[idx.event],
+        actual: cols[idx.actual],
+        forecast: cols[idx.forecast],
+        previous: cols[idx.previous],
         insights: cols[idx.insights] || ""
       };
     })
-    .filter(e => e.datetime && !isNaN(e.datetime))
+    .filter(e => e.datetime)
     .sort((a, b) => a.datetime - b.datetime);
 }
 
-// === Render economic events table (with Insights button only) ===
+// === Render economic events table (adds Insights button) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -130,20 +130,20 @@ function renderEventsTable(id, events, limit = 10) {
     return;
   }
 
-  const rows = events.slice(0, limit).map(ev => {
-    const insightsButton = ev.insights && ev.insights.startsWith("http")
-      ? `<a href="${ev.insights}" target="_blank" class="insight-btn" title="Open insights page">View</a>`
-      : `<span style="opacity:0.4;">–</span>`;
-
-    return `
-      <tr>
-        <td>${ev.datetime.toLocaleString()}</td>
-        <td>${ev.currency}</td>
-        <td>${ev.importance}</td>
-        <td>${ev.event}</td>
-        <td>${insightsButton}</td>
-      </tr>`;
-  }).join("");
+  const rows = events.slice(0, limit).map(ev => `
+    <tr>
+      <td>${ev.datetime.toLocaleString()}</td>
+      <td>${ev.currency}</td>
+      <td>${ev.importance}</td>
+      <td>${ev.event}</td>
+      <td>
+        ${
+          ev.insights
+            ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
+            : ""
+        }
+      </td>
+    </tr>`).join("");
 
   el.innerHTML = `
     <table style="font-size:13px;">
@@ -153,13 +153,13 @@ function renderEventsTable(id, events, limit = 10) {
           <th>Currency</th>
           <th>Importance</th>
           <th>Event</th>
-          <th>Insights</th>
+          <th>Insights</th> <!-- ✅ new column -->
         </tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Convert numeric importance to color block intensity bars ===
+  // === Intensity bar logic (unchanged) ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
@@ -202,19 +202,14 @@ async function main() {
       });
     });
     const today = new Date();
-    const upcoming = holidays
-      .filter(h => h.jsDate >= today)
-      .sort((a,b) => a.jsDate - b.jsDate)
-      .slice(0,5);
+    const upcoming = holidays.filter(h => h.jsDate >= today).sort((a,b)=>a.jsDate-b.jsDate).slice(0,5);
     renderCombinedTable("combinedHolidays", upcoming);
 
     // === EVENTS ===
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
     const events = parseEventsCSV(eventsCSV);
     const now = new Date();
-    const upcomingEvents = events.filter(e => e.datetime > now);
-    console.log("Parsed events:", events.length, "Upcoming:", upcomingEvents.length);
-    renderEventsTable("upcomingEvents", upcomingEvents, 10);
+    renderEventsTable("upcomingEvents", events.filter(e => e.datetime > now), 10);
 
     // === Recalc ===
     function recalc() {
@@ -234,11 +229,13 @@ async function main() {
       const quoteSymbol = sym(QUOTE);
 
       if (volume > 0) {
+        // Left column
         document.getElementById("exchangeEUR").textContent =
           `${baseSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
         document.getElementById("exchangeUSD").textContent =
           `${quoteSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
+        // Right column
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
 
