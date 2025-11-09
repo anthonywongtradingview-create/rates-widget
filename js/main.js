@@ -1,29 +1,15 @@
 // === CONFIG ===
-// Shared Google Sheet (single CSV for all currency pairs)
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=0&single=true&output=csv";
 const EVENTS_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=433576226&single=true&output=csv";
 
-// Read which pair this page is for
 const BASE = window.BASE || "EUR";
 const QUOTE = window.QUOTE || "USD";
-console.log(`✅ Loading data for ${BASE}/${QUOTE}`);
 
 // === Currency symbols ===
-const currencySymbols = {
-  EUR: "€",
-  USD: "$",
-  GBP: "£",
-  CHF: "Fr.",
-  AED: "DH",
-  JPY: "¥",
-  AUD: "A$",
-  CAD: "C$"
-};
-function sym(cur) {
-  return currencySymbols[cur] || cur;
-}
+const currencySymbols = { EUR: "€", USD: "$", GBP: "£", CHF: "Fr.", AED: "DH", JPY: "¥", AUD: "A$", CAD: "C$" };
+function sym(cur) { return currencySymbols[cur] || cur; }
 
 // === DROPDOWNS ===
 const marginSelect = document.getElementById("margin");
@@ -48,59 +34,33 @@ async function fetchCSV(url) {
   return await res.text();
 }
 
-// === PARSE CSV ===
-function parseCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
-  return lines.map(line => {
-    const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
-    return Object.fromEntries(header.map((h, i) => [h, cols[i]]));
-  });
-}
-
-// === UTIL: Convert "DD-MMM-YYYY" or "DD/MM/YYYY" ===
-function safeDateParse(value) {
-  if (!value) return null;
-  const parts = value.match(/\d+/g);
-  if (!parts) return new Date(value);
-  if (parts[2] && parts[1] && parts[0]) {
-    if (value.includes("-")) return new Date(value); // already ISO-like
-    return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+// === SAFE CSV PARSER ===
+function parseCSVLine(line) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"' && line[i + 1] === '"') {
+      current += '"';
+      i++;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === "," && !inQuotes) {
+      result.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
   }
-  return new Date(value);
+  result.push(current.trim());
+  return result;
 }
 
-// === Render combined holidays table ===
-function renderCombinedTable(id, holidays) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (!holidays.length) {
-    el.innerHTML = "<p>No upcoming settlement holidays found.</p>";
-    return;
-  }
-  const rows = holidays
-    .map(
-      h => `
-    <tr>
-      <td>${h.jsDate.toLocaleDateString()}</td>
-      <td>${h.region}</td>
-      <td>${h.name}</td>
-    </tr>`
-    )
-    .join("");
-  el.innerHTML = `
-    <table>
-      <thead>
-        <tr><th>Date</th><th>Region</th><th>Holiday</th></tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-}
-
-// === Parse events CSV (includes Insights column) ===
+// === Parse CSV (with header row) ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
-  const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
+  const header = parseCSVLine(lines.shift()).map(h => h.trim().toLowerCase());
   const idx = {
     datetime: header.indexOf("date_and_time"),
     currency: header.indexOf("currency"),
@@ -108,22 +68,25 @@ function parseEventsCSV(text) {
     event: header.indexOf("event"),
     insights: header.indexOf("insights")
   };
+
   return lines
     .map(line => {
-      const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
+      const cols = parseCSVLine(line);
+      const rawDate = cols[idx.datetime];
+      const parsedDate = new Date(rawDate.replace(/-/g, "/")); // handle 13-Nov-2025 08:00:00 format
       return {
-        datetime: safeDateParse(cols[idx.datetime]),
+        datetime: parsedDate,
         currency: cols[idx.currency],
         importance: cols[idx.importance],
         event: cols[idx.event],
-        insights: cols[idx.insights] || ""
+        insights: cols[idx.insights]
       };
     })
     .filter(e => e.datetime instanceof Date && !isNaN(e.datetime))
     .sort((a, b) => a.datetime - b.datetime);
 }
 
-// === Render economic events table (with clickable Insights button) ===
+// === Render economic events table (adds Insights button) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -132,22 +95,14 @@ function renderEventsTable(id, events, limit = 10) {
     return;
   }
 
-  const rows = events
-    .slice(0, limit)
-    .map(ev => {
-      const insightsButton = ev.insights
-        ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
-        : "";
-      return `
-      <tr>
-        <td>${ev.datetime.toLocaleString()}</td>
-        <td>${ev.currency}</td>
-        <td>${ev.importance}</td>
-        <td>${ev.event}</td>
-        <td>${insightsButton}</td>
-      </tr>`;
-    })
-    .join("");
+  const rows = events.slice(0, limit).map(ev => `
+    <tr>
+      <td>${ev.datetime.toLocaleString()}</td>
+      <td>${ev.currency}</td>
+      <td>${ev.importance}</td>
+      <td>${ev.event}</td>
+      <td>${ev.insights ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>` : ""}</td>
+    </tr>`).join("");
 
   el.innerHTML = `
     <table style="font-size:13px;">
@@ -163,7 +118,7 @@ function renderEventsTable(id, events, limit = 10) {
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Convert numeric importance to color bars ===
+  // === Intensity bars ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
@@ -184,114 +139,14 @@ function renderEventsTable(id, events, limit = 10) {
 // === Main ===
 async function main() {
   try {
-    const csvText = await fetchCSV(CSV_URL);
-    const allRows = parseCSV(csvText);
-    const pair = allRows.find(r => r.base === BASE && r.quote === QUOTE);
-    if (!pair) throw new Error(`${BASE}/${QUOTE} not found in data`);
-
-    const marketRate = parseFloat(pair.rate);
-    document.getElementById("marketRate").textContent = marketRate.toFixed(6);
-    document.getElementById("lastUpdate").textContent =
-      pair.time_of_rate || "unknown";
-
-    // === HOLIDAYS ===
-    const holidays = [];
-    allRows.forEach(row => {
-      [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
-        const year = row[`year_${cur}`];
-        const month = row[`month_${cur}`];
-        const day = row[`day_${cur}`];
-        const name = row[`name_${cur}`];
-        if (year && month && day && name)
-          holidays.push({
-            region: cur.toUpperCase(),
-            jsDate: new Date(`${month} ${day}, ${year}`),
-            name
-          });
-      });
-    });
-    const today = new Date();
-    const upcoming = holidays
-      .filter(h => h.jsDate >= today)
-      .sort((a, b) => a.jsDate - b.jsDate)
-      .slice(0, 5);
-    renderCombinedTable("combinedHolidays", upcoming);
-
-    // === EVENTS ===
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
     const events = parseEventsCSV(eventsCSV);
     const now = new Date();
-    const upcomingEvents = events.filter(e => e.datetime > now);
-    renderEventsTable("upcomingEvents", upcomingEvents, 10);
-
-    // === Recalc ===
-    function recalc() {
-      const margin = parseFloat(marginSelect.value) || 0;
-      const useCustom = document.getElementById("useCustomVolume").checked;
-      const customVolume =
-        parseFloat(document.getElementById("customVolume").value) || 0;
-      const selectedVolume = parseFloat(volumeSelect.value) || 0;
-      const volume = useCustom ? customVolume : selectedVolume;
-
-      const adjusted = marketRate * (1 - margin);
-      const inverse = (1 / marketRate) * (1 - margin);
-
-      document.getElementById("offerRate").textContent = adjusted.toFixed(6);
-      document.getElementById("inverseRate").textContent = inverse.toFixed(6);
-
-      const baseSymbol = sym(BASE);
-      const quoteSymbol = sym(QUOTE);
-
-      if (volume > 0) {
-        document.getElementById(
-          "exchangeEUR"
-        ).textContent = `${baseSymbol}${volume.toLocaleString(undefined, {
-          minimumFractionDigits: 2
-        })}`;
-        document.getElementById(
-          "exchangeUSD"
-        ).textContent = `${quoteSymbol}${volume.toLocaleString(undefined, {
-          minimumFractionDigits: 2
-        })}`;
-
-        const offerAmount = adjusted * volume;
-        const inverseAmount = inverse * volume;
-
-        document.getElementById(
-          "offerAmount"
-        ).textContent = `${quoteSymbol}${offerAmount.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        })}`;
-        document.getElementById(
-          "inverseAmount"
-        ).textContent = `${baseSymbol}${inverseAmount.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        })}`;
-      } else {
-        document.getElementById("exchangeEUR").textContent = "–";
-        document.getElementById("exchangeUSD").textContent = "–";
-        document.getElementById("offerAmount").textContent = "–";
-        document.getElementById("inverseAmount").textContent = "–";
-      }
-    }
-
-    marginSelect.addEventListener("change", recalc);
-    volumeSelect.addEventListener("change", recalc);
-    document.getElementById("customVolume").addEventListener("input", recalc);
-    document
-      .getElementById("useCustomVolume")
-      .addEventListener("change", recalc);
-    recalc();
+    const upcoming = events.filter(e => e.datetime > now);
+    renderEventsTable("upcomingEvents", upcoming, 20);
   } catch (e) {
-    console.error("⚠️ Error loading data:", e);
-    const msg = document.createElement("p");
-    msg.textContent =
-      "⚠️ Some data failed to load. Please refresh or check your Google Sheet link.";
-    msg.style.color = "red";
-    msg.style.textAlign = "center";
-    document.body.prepend(msg);
+    console.error("⚠️ Error:", e);
+    document.getElementById("upcomingEvents").innerHTML = "<p style='color:red'>Failed to load events.</p>";
   }
 }
 
