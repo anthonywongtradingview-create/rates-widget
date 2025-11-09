@@ -304,27 +304,3 @@ h2 {
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-
-/* === Section Titles (Finance Gradient Bar Style) === */
-h2 {
-  position: relative;
-  text-align: center;
-  font-size: 22px;
-  font-weight: 700;
-  color: #222;
-  margin: 60px auto 25px;
-  letter-spacing: 0.5px;
-}
-
-/* Gradient underline effect */
-h2::before {
-  content: "";
-  position: absolute;
-  top: 100%;                 /* places the bar just under the text */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 160px;              /* length of the bar */
-  height: 3px;
-  background: linear-gradient(90deg, #4caf50, #ffb74d); /* green→orange gradient */
-  border-radius: 2px;
-}
