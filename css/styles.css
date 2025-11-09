@@ -25,20 +25,43 @@ body {
   text-decoration: underline;
 }
 
-/* === Control Panel === */
+/* === Control Panel (Centered Layout) === */
 .panel {
   background: #f8f8f8;
-  padding: 15px;
+  padding: 15px 25px;
   border-radius: 8px;
-  margin-bottom: 20px;
+  margin: 0 auto 30px auto;
+  max-width: 850px;             /* keeps it from stretching too wide */
+  
+  display: flex;
+  justify-content: center;      /* ✅ centers content horizontally */
+  align-items: center;          /* ✅ vertically aligns inputs */
+  flex-wrap: wrap;              /* ✅ ensures responsiveness on smaller screens */
+  gap: 15px;                    /* even spacing between items */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-label {
-  display: inline-block;
-  margin-right: 12px;
-}
-select {
-  padding: 6px 10px;
+
+.panel label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 14px;
+  font-weight: 500;
+}
+
+.panel select,
+.panel input[type="number"] {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+.panel select:focus,
+.panel input[type="number"]:focus {
+  border-color: #4caf50;
+  box-shadow: 0 0 3px rgba(76,175,80,0.3);
 }
 
 /* === Info Section (tables container) === */
