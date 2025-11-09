@@ -5,7 +5,7 @@ const CSV_URL =
 const EVENTS_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=433576226&single=true&output=csv";
 
-// Read which pair this page is for (each HTML sets this via <script>)
+// Read which pair this page is for
 const BASE = window.BASE || "EUR";
 const QUOTE = window.QUOTE || "USD";
 console.log(`✅ Loading data for ${BASE}/${QUOTE}`);
@@ -58,11 +58,16 @@ function parseCSV(text) {
   });
 }
 
-// === UTIL: Convert "DD-MMM-YYYY" to JS Date ===
-function toDate(day, monAbbr, year) {
-  const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-  const m = months.indexOf(String(monAbbr).toUpperCase());
-  return m >= 0 ? new Date(`${year}-${m + 1}-${day}`) : new Date();
+// === UTIL: Convert "DD-MMM-YYYY" or "DD/MM/YYYY" ===
+function safeDateParse(value) {
+  if (!value) return null;
+  const parts = value.match(/\d+/g);
+  if (!parts) return new Date(value);
+  if (parts[2] && parts[1] && parts[0]) {
+    if (value.includes("-")) return new Date(value); // already ISO-like
+    return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+  }
+  return new Date(value);
 }
 
 // === Render combined holidays table ===
@@ -73,12 +78,16 @@ function renderCombinedTable(id, holidays) {
     el.innerHTML = "<p>No upcoming settlement holidays found.</p>";
     return;
   }
-  const rows = holidays.map(h => `
+  const rows = holidays
+    .map(
+      h => `
     <tr>
       <td>${h.jsDate.toLocaleDateString()}</td>
       <td>${h.region}</td>
       <td>${h.name}</td>
-    </tr>`).join("");
+    </tr>`
+    )
+    .join("");
   el.innerHTML = `
     <table>
       <thead>
@@ -88,36 +97,33 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === Parse events CSV (robust, includes Insights) ===
+// === Parse events CSV (includes Insights column) ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
   const idx = {
-    datetime: header.findIndex(h => h.includes("date_and_time")),
-    currency: header.findIndex(h => h.includes("currency")),
-    importance: header.findIndex(h => h.includes("importance")),
-    event: header.findIndex(h => h.includes("event")),
-    insights: header.findIndex(h => h.includes("insight")) // tolerate "Insights"
+    datetime: header.indexOf("date_and_time"),
+    currency: header.indexOf("currency"),
+    importance: header.indexOf("importance"),
+    event: header.indexOf("event"),
+    insights: header.indexOf("insights")
   };
-
-  return lines.map(line => {
-    // Handle commas inside quotes properly
-    const cols = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c =>
-      c.replace(/^"|"$/g, "").trim()
-    ) || [];
-
-    return {
-      datetime: new Date(cols[idx.datetime]),
-      currency: cols[idx.currency],
-      importance: cols[idx.importance],
-      event: cols[idx.event],
-      insights: cols[idx.insights] || ""
-    };
-  }).filter(e => e.datetime && !isNaN(e.datetime))
-    .sort((a,b) => a.datetime - b.datetime);
+  return lines
+    .map(line => {
+      const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
+      return {
+        datetime: safeDateParse(cols[idx.datetime]),
+        currency: cols[idx.currency],
+        importance: cols[idx.importance],
+        event: cols[idx.event],
+        insights: cols[idx.insights] || ""
+      };
+    })
+    .filter(e => e.datetime instanceof Date && !isNaN(e.datetime))
+    .sort((a, b) => a.datetime - b.datetime);
 }
 
-// === Render economic events table (with Insights button) ===
+// === Render economic events table (with clickable Insights button) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -126,12 +132,13 @@ function renderEventsTable(id, events, limit = 10) {
     return;
   }
 
-  const rows = events.slice(0, limit).map(ev => {
-    const insightsButton = ev.insights && ev.insights.startsWith("http")
-      ? `<a href="${ev.insights}" target="_blank" class="insight-btn" title="Open insights page">View</a>`
-      : `<span style="opacity:0.4;">–</span>`;
-
-    return `
+  const rows = events
+    .slice(0, limit)
+    .map(ev => {
+      const insightsButton = ev.insights
+        ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
+        : "";
+      return `
       <tr>
         <td>${ev.datetime.toLocaleString()}</td>
         <td>${ev.currency}</td>
@@ -139,7 +146,8 @@ function renderEventsTable(id, events, limit = 10) {
         <td>${ev.event}</td>
         <td>${insightsButton}</td>
       </tr>`;
-  }).join("");
+    })
+    .join("");
 
   el.innerHTML = `
     <table style="font-size:13px;">
@@ -155,7 +163,7 @@ function renderEventsTable(id, events, limit = 10) {
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Convert numeric importance to intensity bars ===
+  // === Convert numeric importance to color bars ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
@@ -168,7 +176,7 @@ function renderEventsTable(id, events, limit = 10) {
         html += '<span class="block-empty"></span>';
       }
     }
-    html += '</div>';
+    html += "</div>";
     cell.innerHTML = html;
   });
 }
@@ -183,7 +191,8 @@ async function main() {
 
     const marketRate = parseFloat(pair.rate);
     document.getElementById("marketRate").textContent = marketRate.toFixed(6);
-    document.getElementById("lastUpdate").textContent = pair.time_of_rate || "unknown";
+    document.getElementById("lastUpdate").textContent =
+      pair.time_of_rate || "unknown";
 
     // === HOLIDAYS ===
     const holidays = [];
@@ -194,24 +203,33 @@ async function main() {
         const day = row[`day_${cur}`];
         const name = row[`name_${cur}`];
         if (year && month && day && name)
-          holidays.push({ region: cur.toUpperCase(), jsDate: toDate(day, month, year), name });
+          holidays.push({
+            region: cur.toUpperCase(),
+            jsDate: new Date(`${month} ${day}, ${year}`),
+            name
+          });
       });
     });
     const today = new Date();
-    const upcoming = holidays.filter(h => h.jsDate >= today).sort((a,b)=>a.jsDate-b.jsDate).slice(0,5);
+    const upcoming = holidays
+      .filter(h => h.jsDate >= today)
+      .sort((a, b) => a.jsDate - b.jsDate)
+      .slice(0, 5);
     renderCombinedTable("combinedHolidays", upcoming);
 
     // === EVENTS ===
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
     const events = parseEventsCSV(eventsCSV);
     const now = new Date();
-    renderEventsTable("upcomingEvents", events.filter(e => e.datetime > now), 10);
+    const upcomingEvents = events.filter(e => e.datetime > now);
+    renderEventsTable("upcomingEvents", upcomingEvents, 10);
 
     // === Recalc ===
     function recalc() {
       const margin = parseFloat(marginSelect.value) || 0;
       const useCustom = document.getElementById("useCustomVolume").checked;
-      const customVolume = parseFloat(document.getElementById("customVolume").value) || 0;
+      const customVolume =
+        parseFloat(document.getElementById("customVolume").value) || 0;
       const selectedVolume = parseFloat(volumeSelect.value) || 0;
       const volume = useCustom ? customVolume : selectedVolume;
 
@@ -225,24 +243,32 @@ async function main() {
       const quoteSymbol = sym(QUOTE);
 
       if (volume > 0) {
-        document.getElementById("exchangeEUR").textContent =
-          `${baseSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-        document.getElementById("exchangeUSD").textContent =
-          `${quoteSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        document.getElementById(
+          "exchangeEUR"
+        ).textContent = `${baseSymbol}${volume.toLocaleString(undefined, {
+          minimumFractionDigits: 2
+        })}`;
+        document.getElementById(
+          "exchangeUSD"
+        ).textContent = `${quoteSymbol}${volume.toLocaleString(undefined, {
+          minimumFractionDigits: 2
+        })}`;
 
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
 
-        document.getElementById("offerAmount").textContent =
-          `${quoteSymbol}${offerAmount.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}`;
-        document.getElementById("inverseAmount").textContent =
-          `${baseSymbol}${inverseAmount.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}`;
+        document.getElementById(
+          "offerAmount"
+        ).textContent = `${quoteSymbol}${offerAmount.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`;
+        document.getElementById(
+          "inverseAmount"
+        ).textContent = `${baseSymbol}${inverseAmount.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`;
       } else {
         document.getElementById("exchangeEUR").textContent = "–";
         document.getElementById("exchangeUSD").textContent = "–";
@@ -254,12 +280,18 @@ async function main() {
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
     document.getElementById("customVolume").addEventListener("input", recalc);
-    document.getElementById("useCustomVolume").addEventListener("change", recalc);
+    document
+      .getElementById("useCustomVolume")
+      .addEventListener("change", recalc);
     recalc();
-
   } catch (e) {
-    document.body.innerHTML = `<p style="color:red">${e.message}</p>`;
-    console.error(e);
+    console.error("⚠️ Error loading data:", e);
+    const msg = document.createElement("p");
+    msg.textContent =
+      "⚠️ Some data failed to load. Please refresh or check your Google Sheet link.";
+    msg.style.color = "red";
+    msg.style.textAlign = "center";
+    document.body.prepend(msg);
   }
 }
 
