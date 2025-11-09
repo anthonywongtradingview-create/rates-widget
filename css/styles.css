@@ -248,6 +248,28 @@ h2 {
   border-top-right-radius: 12px;
 }
 
+/* === Intensity Bars (Importance Level) === */
+.importance-blocks {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.importance-blocks span {
+  display: inline-block;
+  width: 20px;       /* twice as long */
+  height: 10px;
+  border-radius: 3px;
+}
+
+/* Colors for active segments */
+.block-green  { background: #b5e7a0; }   /* light matte green */
+.block-orange { background: #ffd59e; }   /* light matte orange */
+.block-red    { background: #ff9999; }   /* matte red */
+
+/* Inactive / empty segments */
+.block-empty  { background: #eeeeee; }
+
 
 /* === Optional Polish === */
 .rates-table,
