@@ -88,7 +88,7 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === Parse events CSV (now includes Insights) ===
+// === Parse events CSV (now includes Insights column) ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
@@ -97,17 +97,25 @@ function parseEventsCSV(text) {
     currency: header.indexOf("currency"),
     importance: header.indexOf("importance"),
     event: header.indexOf("event"),
-    insights: header.indexOf("insights") // ✅ only one new column
+    actual: header.indexOf("actual"),
+    forecast: header.indexOf("forecast"),
+    previous: header.indexOf("previous"),
+    insights: header.indexOf("insights")
   };
 
   return lines
     .map(line => {
       const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
+      const dateVal = cols[idx.datetime];
+      const parsed = dateVal ? new Date(dateVal.replace(/-/g, "/")) : null;
       return {
-        datetime: new Date(cols[idx.datetime]),
+        datetime: parsed,
         currency: cols[idx.currency],
         importance: cols[idx.importance],
         event: cols[idx.event],
+        actual: cols[idx.actual],
+        forecast: cols[idx.forecast],
+        previous: cols[idx.previous],
         insights: cols[idx.insights] || ""
       };
     })
@@ -115,7 +123,7 @@ function parseEventsCSV(text) {
     .sort((a, b) => a.datetime - b.datetime);
 }
 
-// === Render economic events table (with Insights button) ===
+// === Render economic events table (adds Insights button) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -146,13 +154,13 @@ function renderEventsTable(id, events, limit = 10) {
           <th>Currency</th>
           <th>Importance</th>
           <th>Event</th>
-          <th>Insights</th> <!-- ✅ New Column -->
+          <th>Insights</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Convert numeric importance to color block intensity bars ===
+  // === Convert numeric importance to color blocks ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
@@ -165,7 +173,7 @@ function renderEventsTable(id, events, limit = 10) {
         html += '<span class="block-empty"></span>';
       }
     }
-    html += '</div>';
+    html += "</div>";
     cell.innerHTML = html;
   });
 }
@@ -173,7 +181,6 @@ function renderEventsTable(id, events, limit = 10) {
 // === Main ===
 async function main() {
   try {
-    // === FX MAIN ===
     const csvText = await fetchCSV(CSV_URL);
     const allRows = parseCSV(csvText);
     const pair = allRows.find(r => r.base === BASE && r.quote === QUOTE);
@@ -205,7 +212,7 @@ async function main() {
     const now = new Date();
     renderEventsTable("upcomingEvents", events.filter(e => e.datetime > now), 10);
 
-    // === RECALC ===
+    // === RECALC (Includes Expected Trading Revenue) ===
     function recalc() {
       const margin = parseFloat(marginSelect.value) || 0;
       const useCustom = document.getElementById("useCustomVolume").checked;
@@ -241,11 +248,19 @@ async function main() {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           })}`;
+
+        // === Expected Trading Revenue (Estimates)
+        const revenueEUR = (offerAmount - volume * marketRate).toFixed(2);
+        const revenueUSD = (inverseAmount - volume / marketRate).toFixed(2);
+        document.getElementById("revenueEUR").textContent = `${quoteSymbol}${Math.abs(revenueEUR)}`;
+        document.getElementById("revenueUSD").textContent = `${baseSymbol}${Math.abs(revenueUSD)}`;
       } else {
         document.getElementById("exchangeEUR").textContent = "–";
         document.getElementById("exchangeUSD").textContent = "–";
         document.getElementById("offerAmount").textContent = "–";
         document.getElementById("inverseAmount").textContent = "–";
+        document.getElementById("revenueEUR").textContent = "–";
+        document.getElementById("revenueUSD").textContent = "–";
       }
     }
 
