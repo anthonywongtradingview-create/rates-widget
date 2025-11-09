@@ -88,10 +88,11 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === Parse events CSV (now includes Insights column) ===
+// === Parse events CSV (adds Insights, keeps rest intact) ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
+
   const idx = {
     datetime: header.indexOf("date_and_time"),
     currency: header.indexOf("currency"),
@@ -100,30 +101,28 @@ function parseEventsCSV(text) {
     actual: header.indexOf("actual"),
     forecast: header.indexOf("forecast"),
     previous: header.indexOf("previous"),
-    insights: header.indexOf("insights")
+    insights: header.indexOf("insights")  // 👈 new field
   };
 
   return lines
     .map(line => {
       const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
-      const dateVal = cols[idx.datetime];
-      const parsed = dateVal ? new Date(dateVal.replace(/-/g, "/")) : null;
       return {
-        datetime: parsed,
+        datetime: new Date(cols[idx.datetime]),
         currency: cols[idx.currency],
         importance: cols[idx.importance],
         event: cols[idx.event],
         actual: cols[idx.actual],
         forecast: cols[idx.forecast],
         previous: cols[idx.previous],
-        insights: cols[idx.insights] || ""
+        insights: idx.insights >= 0 ? (cols[idx.insights] || "") : ""
       };
     })
     .filter(e => e.datetime instanceof Date && !isNaN(e.datetime))
     .sort((a, b) => a.datetime - b.datetime);
 }
 
-// === Render economic events table (adds Insights button) ===
+// === Render economic events table (4 cols + Insights) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -160,7 +159,7 @@ function renderEventsTable(id, events, limit = 10) {
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Convert numeric importance to color blocks ===
+  // === Convert numeric importance to color block intensity bars ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
@@ -173,7 +172,7 @@ function renderEventsTable(id, events, limit = 10) {
         html += '<span class="block-empty"></span>';
       }
     }
-    html += "</div>";
+    html += '</div>';
     cell.innerHTML = html;
   });
 }
@@ -212,7 +211,7 @@ async function main() {
     const now = new Date();
     renderEventsTable("upcomingEvents", events.filter(e => e.datetime > now), 10);
 
-    // === RECALC (Includes Expected Trading Revenue) ===
+    // === Recalc FX + Expected Trading Revenue (original logic) ===
     function recalc() {
       const margin = parseFloat(marginSelect.value) || 0;
       const useCustom = document.getElementById("useCustomVolume").checked;
@@ -230,11 +229,13 @@ async function main() {
       const quoteSymbol = sym(QUOTE);
 
       if (volume > 0) {
+        // Left column (For Exchange Amount)
         document.getElementById("exchangeEUR").textContent =
           `${baseSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
         document.getElementById("exchangeUSD").textContent =
           `${quoteSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
+        // Right column (We Can Offer)
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
 
@@ -249,21 +250,30 @@ async function main() {
             maximumFractionDigits: 2
           })}`;
 
-        // === Expected Trading Revenue (Estimates)
-        const revenueEUR = (offerAmount - volume * marketRate).toFixed(2);
-        const revenueUSD = (inverseAmount - volume / marketRate).toFixed(2);
-        document.getElementById("revenueEUR").textContent = `${quoteSymbol}${Math.abs(revenueEUR)}`;
-        document.getElementById("revenueUSD").textContent = `${baseSymbol}${Math.abs(revenueUSD)}`;
+        // === Revenue (always in EUR) — original version
+        const effectiveMargin = margin - 0.00055;
+        if (effectiveMargin > 0) {
+          const revenueEURUSD = volume * effectiveMargin;
+          const revenueUSDEUR = inverseAmount * effectiveMargin;
+          document.getElementById("revenueEURUSD").textContent =
+            revenueEURUSD.toLocaleString(undefined, { style: "currency", currency: "EUR" });
+          document.getElementById("revenueUSDEUR").textContent =
+            revenueUSDEUR.toLocaleString(undefined, { style: "currency", currency: "EUR" });
+        } else {
+          document.getElementById("revenueEURUSD").textContent = "–";
+          document.getElementById("revenueUSDEUR").textContent = "–";
+        }
       } else {
         document.getElementById("exchangeEUR").textContent = "–";
         document.getElementById("exchangeUSD").textContent = "–";
         document.getElementById("offerAmount").textContent = "–";
         document.getElementById("inverseAmount").textContent = "–";
-        document.getElementById("revenueEUR").textContent = "–";
-        document.getElementById("revenueUSD").textContent = "–";
+        document.getElementById("revenueEURUSD").textContent = "–";
+        document.getElementById("revenueUSDEUR").textContent = "–";
       }
     }
 
+    // === Event listeners ===
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
     document.getElementById("customVolume").addEventListener("input", recalc);
