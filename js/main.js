@@ -148,6 +148,23 @@ function renderEventsTable(id, events, limit = 10) {
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
+
+  // === Convert numeric importance to color block intensity bars ===
+  document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
+    const value = Number(cell.textContent.trim());
+    let html = '<div class="importance-blocks">';
+    for (let i = 1; i <= 3; i++) {
+      if (i <= value) {
+        if (value === 1) html += '<span class="block-green"></span>';
+        else if (value === 2) html += '<span class="block-orange"></span>';
+        else if (value === 3) html += '<span class="block-red"></span>';
+      } else {
+        html += '<span class="block-empty"></span>';
+      }
+    }
+    html += '</div>';
+    cell.innerHTML = html;
+  });
 }
 
 // === Main ===
@@ -260,4 +277,3 @@ async function main() {
 }
 
 main();
-
