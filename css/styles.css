@@ -1,325 +1,275 @@
-/* === Base === */
-body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: #fff;
-  color: #111;
-  margin: 0;
-  padding: 20px;
+// === CONFIG ===
+// Shared Google Sheet (single CSV for all currency pairs)
+const CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=0&single=true&output=csv";
+const EVENTS_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=433576226&single=true&output=csv";
+
+// Read which pair this page is for (each HTML sets this via <script>)
+const BASE = window.BASE || "EUR";
+const QUOTE = window.QUOTE || "USD";
+console.log(`✅ Loading data for ${BASE}/${QUOTE}`);
+
+// === Currency symbols ===
+const currencySymbols = {
+  EUR: "€",
+  USD: "$",
+  GBP: "£",
+  CHF: "Fr.",
+  AED: "DH",
+  JPY: "¥",
+  AUD: "A$",
+  CAD: "C$"
+};
+function sym(cur) {
+  return currencySymbols[cur] || cur;
 }
 
-/* === Header + Nav === */
-.site-header {
-  margin-bottom: 16px;
+// === DROPDOWNS ===
+const marginSelect = document.getElementById("margin");
+const volumeSelect = document.getElementById("volume");
+for (let i = 0.15; i <= 3.0; i += 0.05) {
+  const opt = document.createElement("option");
+  opt.value = i / 100;
+  opt.textContent = i.toFixed(2) + "%";
+  marginSelect.appendChild(opt);
 }
-.site-header h1 {
-  font-size: 20px;
-  margin: 0 0 8px;
-}
-.site-nav a {
-  display: inline-block;
-  margin-right: 12px;
-  text-decoration: none;
-  color: #0a58ca;
-}
-.site-nav a:hover {
-  text-decoration: underline;
+for (let v = 10000; v <= 100000; v += 10000) {
+  const opt = document.createElement("option");
+  opt.value = v;
+  opt.textContent = v.toLocaleString();
+  volumeSelect.appendChild(opt);
 }
 
-/* === Control Panel (Centered Layout) === */
-.panel {
-  background: #f8f8f8;
-  padding: 15px 25px;
-  border-radius: 8px;
-  margin: 0 auto 30px auto;
-  max-width: 850px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+// === FETCH CSV ===
+async function fetchCSV(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch CSV: " + res.status);
+  return await res.text();
 }
 
-.panel label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 500;
+// === PARSE CSV (for the main FX sheet) ===
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
+  return lines.map(line => {
+    const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
+    return Object.fromEntries(header.map((h, i) => [h, cols[i]]));
+  });
 }
 
-.panel select,
-.panel input[type="number"] {
-  padding: 6px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  outline: none;
+// === UTIL: Convert "DD-MMM-YYYY" to JS Date ===
+function toDate(day, monAbbr, year) {
+  const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const m = months.indexOf(String(monAbbr).toUpperCase());
+  return m >= 0 ? new Date(`${year}-${m + 1}-${day}`) : new Date();
 }
 
-.panel select:focus,
-.panel input[type="number"]:focus {
-  border-color: #4caf50;
-  box-shadow: 0 0 3px rgba(76,175,80,0.3);
+// === Render combined holidays table ===
+function renderCombinedTable(id, holidays) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!holidays.length) {
+    el.innerHTML = "<p>No upcoming settlement holidays found.</p>";
+    return;
+  }
+  const rows = holidays.map(h => `
+    <tr>
+      <td>${h.jsDate.toLocaleDateString()}</td>
+      <td>${h.region}</td>
+      <td>${h.name}</td>
+    </tr>`).join("");
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Region</th><th>Holiday</th></tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
-/* === Info Section === */
-.info {
-  max-width: 950px;
-  margin: 0 auto;
+// === Parse events CSV (simple + adds Insights) ===
+function parseEventsCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
+
+  const idx = {
+    datetime: header.indexOf("date_and_time"),
+    currency: header.indexOf("currency"),
+    importance: header.indexOf("importance"),
+    event: header.indexOf("event"),
+    insights: header.indexOf("insights")
+  };
+
+  console.log("Event header columns:", header);
+  console.log("Index map:", idx);
+
+  return lines
+    .map(line => {
+      const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
+      const datetime = new Date(cols[idx.datetime]);
+
+      return {
+        datetime,
+        currency: cols[idx.currency],
+        importance: cols[idx.importance],
+        event: cols[idx.event],
+        insights: cols[idx.insights] || ""
+      };
+    })
+    .filter(e => e.datetime && !isNaN(e.datetime))
+    .sort((a, b) => a.datetime - b.datetime);
 }
 
-/* === General Table Rules === */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  margin-top: 20px;
+// === Render economic events table (with Insights button only) ===
+function renderEventsTable(id, events, limit = 10) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!events.length) {
+    el.innerHTML = "<p>No upcoming events found.</p>";
+    return;
+  }
+
+  const rows = events.slice(0, limit).map(ev => {
+    const insightsButton = ev.insights && ev.insights.startsWith("http")
+      ? `<a href="${ev.insights}" target="_blank" class="insight-btn" title="Open insights page">View</a>`
+      : `<span style="opacity:0.4;">–</span>`;
+
+    return `
+      <tr>
+        <td>${ev.datetime.toLocaleString()}</td>
+        <td>${ev.currency}</td>
+        <td>${ev.importance}</td>
+        <td>${ev.event}</td>
+        <td>${insightsButton}</td>
+      </tr>`;
+  }).join("");
+
+  el.innerHTML = `
+    <table style="font-size:13px;">
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Currency</th>
+          <th>Importance</th>
+          <th>Event</th>
+          <th>Insights</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  // === Convert numeric importance to color block intensity bars ===
+  document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
+    const value = Number(cell.textContent.trim());
+    let html = '<div class="importance-blocks">';
+    for (let i = 1; i <= 3; i++) {
+      if (i <= value) {
+        if (value === 1) html += '<span class="block-green"></span>';
+        else if (value === 2) html += '<span class="block-orange"></span>';
+        else if (value === 3) html += '<span class="block-red"></span>';
+      } else {
+        html += '<span class="block-empty"></span>';
+      }
+    }
+    html += '</div>';
+    cell.innerHTML = html;
+  });
 }
 
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px 10px;
-  text-align: right;
-  white-space: nowrap;
+// === Main ===
+async function main() {
+  try {
+    const csvText = await fetchCSV(CSV_URL);
+    const allRows = parseCSV(csvText);
+    const pair = allRows.find(r => r.base === BASE && r.quote === QUOTE);
+    if (!pair) throw new Error(`${BASE}/${QUOTE} not found in data`);
+
+    const marketRate = parseFloat(pair.rate);
+    document.getElementById("marketRate").textContent = marketRate.toFixed(6);
+    document.getElementById("lastUpdate").textContent = pair.time_of_rate || "unknown";
+
+    // === HOLIDAYS ===
+    const holidays = [];
+    allRows.forEach(row => {
+      [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
+        const year = row[`year_${cur}`];
+        const month = row[`month_${cur}`];
+        const day = row[`day_${cur}`];
+        const name = row[`name_${cur}`];
+        if (year && month && day && name)
+          holidays.push({ region: cur.toUpperCase(), jsDate: toDate(day, month, year), name });
+      });
+    });
+    const today = new Date();
+    const upcoming = holidays
+      .filter(h => h.jsDate >= today)
+      .sort((a,b) => a.jsDate - b.jsDate)
+      .slice(0,5);
+    renderCombinedTable("combinedHolidays", upcoming);
+
+    // === EVENTS ===
+    const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
+    const events = parseEventsCSV(eventsCSV);
+    const now = new Date();
+    const upcomingEvents = events.filter(e => e.datetime > now);
+    console.log("Parsed events:", events.length, "Upcoming:", upcomingEvents.length);
+    renderEventsTable("upcomingEvents", upcomingEvents, 10);
+
+    // === Recalc ===
+    function recalc() {
+      const margin = parseFloat(marginSelect.value) || 0;
+      const useCustom = document.getElementById("useCustomVolume").checked;
+      const customVolume = parseFloat(document.getElementById("customVolume").value) || 0;
+      const selectedVolume = parseFloat(volumeSelect.value) || 0;
+      const volume = useCustom ? customVolume : selectedVolume;
+
+      const adjusted = marketRate * (1 - margin);
+      const inverse = (1 / marketRate) * (1 - margin);
+
+      document.getElementById("offerRate").textContent = adjusted.toFixed(6);
+      document.getElementById("inverseRate").textContent = inverse.toFixed(6);
+
+      const baseSymbol = sym(BASE);
+      const quoteSymbol = sym(QUOTE);
+
+      if (volume > 0) {
+        document.getElementById("exchangeEUR").textContent =
+          `${baseSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        document.getElementById("exchangeUSD").textContent =
+          `${quoteSymbol}${volume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+        const offerAmount = adjusted * volume;
+        const inverseAmount = inverse * volume;
+
+        document.getElementById("offerAmount").textContent =
+          `${quoteSymbol}${offerAmount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}`;
+        document.getElementById("inverseAmount").textContent =
+          `${baseSymbol}${inverseAmount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}`;
+      } else {
+        document.getElementById("exchangeEUR").textContent = "–";
+        document.getElementById("exchangeUSD").textContent = "–";
+        document.getElementById("offerAmount").textContent = "–";
+        document.getElementById("inverseAmount").textContent = "–";
+      }
+    }
+
+    marginSelect.addEventListener("change", recalc);
+    volumeSelect.addEventListener("change", recalc);
+    document.getElementById("customVolume").addEventListener("input", recalc);
+    document.getElementById("useCustomVolume").addEventListener("change", recalc);
+    recalc();
+
+  } catch (e) {
+    document.body.innerHTML = `<p style="color:red">${e.message}</p>`;
+    console.error(e);
+  }
 }
 
-th:first-child,
-td:first-child {
-  text-align: left;
-  width: 28%;
-}
-th:nth-child(2),
-td:nth-child(2) {
-  width: 24%;
-}
-th:nth-child(3),
-td:nth-child(3) {
-  width: 24%;
-}
-th:nth-child(4),
-td:nth-child(4) {
-  width: 24%;
-}
-
-th {
-  background: #f0f0f0;
-  font-weight: 600;
-}
-
-.info {
-  font-size: 14px;
-  margin-top: 8px;
-  color: #555;
-}
-
-/* === Rates Table === */
-.rates-table thead th {
-  background-color: #d8f4d1;
-}
-.rates-table tbody td:first-child {
-  background-color: #e9fbe4;
-  font-weight: bold;
-}
-.rates-table tbody td {
-  background-color: #f5fff5;
-}
-
-/* === Rates Header Flex Layout === */
-.rates-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-.rates-left,
-.rates-right {
-  font-weight: 600;
-  color: #333;
-  font-size: 15px;
-}
-
-/* === Offer Table === */
-.offer-table thead th {
-  background-color: #9acb7e;
-}
-.offer-table tbody td:first-child {
-  background-color: #e9fbe4;
-  font-weight: bold;
-}
-.offer-table tbody td {
-  background-color: #f5fff5;
-}
-
-/* === Revenue Table === */
-.revenue-table thead th {
-  background-color: #f7e69e;
-}
-.revenue-table tbody td:first-child {
-  background-color: #fff9d6;
-  font-weight: bold;
-}
-.revenue-table tbody td {
-  background-color: #fffef0;
-}
-
-/* === Next 5 Settlement Holidays Table === */
-#combinedHolidays {
-  max-width: 700px;
-  margin: 30px auto;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-#combinedHolidays table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  background: #fff;
-}
-
-#combinedHolidays th,
-#combinedHolidays td {
-  padding: 12px 14px;
-  text-align: left;
-  font-size: 14px;
-  border-bottom: 1px solid #e6e6e6;
-}
-
-#combinedHolidays th {
-  background: #f7f7f7;
-  font-weight: 600;
-  color: #222;
-}
-
-#combinedHolidays tr:nth-child(even) td {
-  background-color: #fafafa;
-}
-
-#combinedHolidays tr:hover td {
-  background-color: #f0f7ff;
-}
-
-/* === Section Titles === */
-h2 {
-  position: relative;
-  text-align: center;
-  font-size: 22px;
-  font-weight: 700;
-  color: #222;
-  margin: 60px auto 25px;
-  letter-spacing: 0.5px;
-}
-
-/* Gradient underline effect */
-h2::before {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 500px;
-  height: 8px;
-  background: linear-gradient(90deg, #4caf50, #ffb74d);
-  border-radius: 2px;
-}
-
-/* === Upcoming Economic Events Table === */
-#upcomingEvents {
-  max-width: 1000px;
-  margin: 40px auto;
-  overflow-x: auto;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-#upcomingEvents table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  background: #fff;
-}
-
-#upcomingEvents th {
-  background: linear-gradient(to right, #f3f3f3, #ececec);
-  color: #222;
-  font-weight: 600;
-  padding: 12px 14px;
-  text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-#upcomingEvents td {
-  padding: 10px 14px;
-  font-size: 14px;
-  border-bottom: 1px solid #eee;
-  color: #333;
-  text-align: center;
-  vertical-align: middle;
-}
-
-#upcomingEvents th:nth-child(2),
-#upcomingEvents td:nth-child(2) {
-  width: 6%;
-}
-#upcomingEvents th:nth-child(4),
-#upcomingEvents td:nth-child(4) {
-  width: 40%;
-}
-
-#upcomingEvents tr:nth-child(even) td {
-  background-color: #fafafa;
-}
-
-#upcomingEvents tr:hover td {
-  background-color: #f0f7ff;
-}
-
-/* === Intensity Bars === */
-.importance-blocks {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 3px;
-  width: 120px;
-  margin: 0 auto;
-  height: 14px;
-}
-.importance-blocks span {
-  display: inline-block;
-  width: 40px;
-  height: 10px;
-  border-radius: 3px;
-}
-.block-green  { background: #b5e7a0; }
-.block-orange { background: #ffd59e; }
-.block-red    { background: #ff9999; }
-.block-empty  { background: #eeeeee; }
-
-/* === Insight Button === */
-.insight-btn {
-  display: inline-block;
-  padding: 6px 12px;
-  font-size: 13px;
-  color: #fff;
-  background: linear-gradient(90deg, #4caf50, #43a047);
-  border: none;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.2s ease-in-out;
-}
-.insight-btn:hover {
-  background: linear-gradient(90deg, #66bb6a, #57a95a);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transform: translateY(-1px);
-}
+main();
