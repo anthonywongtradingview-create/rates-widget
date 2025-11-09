@@ -182,7 +182,7 @@ h2 {
 }
 
 
-/* === Modernized Upcoming Economic Events Table === */
+/* === Modernized Upcoming Economic Events Table (Refined Layout) === */
 #upcomingEvents {
   max-width: 1000px;
   margin: 40px auto;
@@ -206,7 +206,7 @@ h2 {
   color: #222;
   font-weight: 600;
   padding: 12px 14px;
-  text-align: left;
+  text-align: center; /* ✅ centered headers */
   position: sticky;
   top: 0;
   z-index: 1;
@@ -220,6 +220,19 @@ h2 {
   border-bottom: 1px solid #eee;
   color: #333;
   line-height: 1.5;
+  text-align: center; /* ✅ centered content */
+  vertical-align: middle;
+}
+
+/* Adjust column widths */
+#upcomingEvents th:nth-child(2),
+#upcomingEvents td:nth-child(2) {
+  width: 6%; /* Currency column - half width */
+}
+
+#upcomingEvents th:nth-child(4),
+#upcomingEvents td:nth-child(4) {
+  width: 40%; /* Event column - double width */
 }
 
 /* Alternate row shading */
