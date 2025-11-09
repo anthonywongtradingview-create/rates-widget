@@ -261,19 +261,31 @@ h2 {
   border-top-right-radius: 12px;
 }
 
-/* === Intensity Bars (Importance Level) === */
+/* === Intensity Bars (Centered + 50px wide) === */
 .importance-blocks {
   display: flex;
-  align-items: center;
-  gap: 2px;
+  justify-content: center;    /* ✅ center horizontally */
+  align-items: center;        /* ✅ center vertically */
+  gap: 3px;
+  width: 50px;                /* ✅ total bar width */
+  margin: 0 auto;             /* ensures centering in table cell */
+  height: 14px;
 }
 
 .importance-blocks span {
   display: inline-block;
-  width: 20px;       /* twice as long */
+  width: 16px;                /* roughly 1/3 of 50px width */
   height: 10px;
   border-radius: 3px;
 }
+
+/* Active segment colors */
+.block-green  { background: #b5e7a0; }   /* light matte green */
+.block-orange { background: #ffd59e; }   /* light matte orange */
+.block-red    { background: #ff9999; }   /* matte red */
+
+/* Inactive segment */
+.block-empty  { background: #eeeeee; }
 
 /* Colors for active segments */
 .block-green  { background: #b5e7a0; }   /* light matte green */
