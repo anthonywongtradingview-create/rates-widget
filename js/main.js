@@ -88,19 +88,24 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === Parse events CSV (with Insights column only) ===
+// === Parse events CSV (robust, includes Insights) ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
   const idx = {
-    datetime: header.indexOf("date_and_time"),
-    currency: header.indexOf("currency"),
-    importance: header.indexOf("importance"),
-    event: header.indexOf("event"),
-    insights: header.indexOf("insights") // ✅ Only one extra column
+    datetime: header.findIndex(h => h.includes("date_and_time")),
+    currency: header.findIndex(h => h.includes("currency")),
+    importance: header.findIndex(h => h.includes("importance")),
+    event: header.findIndex(h => h.includes("event")),
+    insights: header.findIndex(h => h.includes("insight")) // tolerate "Insights"
   };
+
   return lines.map(line => {
-    const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
+    // Handle commas inside quotes properly
+    const cols = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c =>
+      c.replace(/^"|"$/g, "").trim()
+    ) || [];
+
     return {
       datetime: new Date(cols[idx.datetime]),
       currency: cols[idx.currency],
@@ -108,10 +113,11 @@ function parseEventsCSV(text) {
       event: cols[idx.event],
       insights: cols[idx.insights] || ""
     };
-  }).filter(e => e.datetime).sort((a,b) => a.datetime - b.datetime);
+  }).filter(e => e.datetime && !isNaN(e.datetime))
+    .sort((a,b) => a.datetime - b.datetime);
 }
 
-// === Render economic events table (with Insights button only) ===
+// === Render economic events table (with Insights button) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -121,9 +127,9 @@ function renderEventsTable(id, events, limit = 10) {
   }
 
   const rows = events.slice(0, limit).map(ev => {
-    const insightsButton = ev.insights
-      ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
-      : "";
+    const insightsButton = ev.insights && ev.insights.startsWith("http")
+      ? `<a href="${ev.insights}" target="_blank" class="insight-btn" title="Open insights page">View</a>`
+      : `<span style="opacity:0.4;">–</span>`;
 
     return `
       <tr>
@@ -143,13 +149,13 @@ function renderEventsTable(id, events, limit = 10) {
           <th>Currency</th>
           <th>Importance</th>
           <th>Event</th>
-          <th>Insights</th> <!-- ✅ Only one new column -->
+          <th>Insights</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Convert numeric importance to color block intensity bars ===
+  // === Convert numeric importance to intensity bars ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
