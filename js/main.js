@@ -6,6 +6,7 @@ const CSV_URL =
 const EVENTS_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=135859645&single=true&output=csv";
 
+// === BASE AND QUOTE DETECTION ===
 const BASE = window.BASE || "EUR";
 const QUOTE = window.QUOTE || "USD";
 console.log(`✅ Loading data for ${BASE}/${QUOTE}`);
@@ -65,11 +66,10 @@ function parseEventsCSV(text) {
   text = text.replace(/^\uFEFF/, ""); // remove BOM if present
   const lines = text.trim().split(/\r?\n/);
 
-  // Skip metadata or "last updated" lines
+  // Skip metadata lines until we reach the header
   while (lines.length && !lines[0].toLowerCase().includes("date_and_time")) {
     lines.shift();
   }
-
   if (!lines.length) return [];
 
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
@@ -83,7 +83,7 @@ function parseEventsCSV(text) {
     actual: header.indexOf("actual"),
     forecast: header.indexOf("forecast"),
     previous: header.indexOf("previous"),
-    insights: header.indexOf("insights"), // 👈 main one
+    insights: header.indexOf("insights"),
   };
 
   return lines.map(line => {
@@ -130,7 +130,7 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === Render economic events table (with Insights column) ===
+// === Render Economic Events Table (with Insights column) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   console.log("Rendering events table, total:", events.length);
@@ -141,7 +141,6 @@ function renderEventsTable(id, events, limit = 10) {
     return;
   }
 
-  // Build all rows
   const rows = events.slice(0, limit).map(ev => {
     const dateStr = ev.datetime
       ? new Date(ev.datetime).toLocaleString("en-GB", {
@@ -153,15 +152,14 @@ function renderEventsTable(id, events, limit = 10) {
         })
       : "";
 
-  // ✅ Force link rendering as HTML even if empty string
+    // Handle Insights column (can contain hyperlink)
     let link = ev.insights || "";
-    link = link.replace(/^"+|"+$/g, "").trim(); // strip stray quotes
-    console.log("Link parsed:", link); // debug
-    const insightsCell =
-      link && link.includes("http")
-        ? `<a href="${link}" target="_blank" class="insight-btn">View</a>`
-        : `<span style="color:#ccc;">—</span>`;
+    link = link.replace(/^"+|"+$/g, "").trim();
 
+    const insightsCell =
+      link && link.startsWith("http")
+        ? `<a href="${link}" target="_blank" class="insight-btn">View</a>`
+        : (link ? `<span>${link}</span>` : `<span style="color:#ccc;">—</span>`);
 
     return `
       <tr>
@@ -173,7 +171,6 @@ function renderEventsTable(id, events, limit = 10) {
       </tr>`;
   }).join("");
 
-  // ✅ Table with all 5 headers defined explicitly
   el.innerHTML = `
     <table class="events-table" style="font-size:13px; width:100%; border-collapse:collapse;">
       <thead>
@@ -188,7 +185,7 @@ function renderEventsTable(id, events, limit = 10) {
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Add colored bars to Importance column ===
+  // === Add colored blocks to Importance ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
@@ -209,6 +206,7 @@ function renderEventsTable(id, events, limit = 10) {
 // === MAIN ===
 async function main() {
   try {
+    // Load FX rates
     const csvText = await fetchCSV(CSV_URL);
     const allRows = parseCSV(csvText);
 
