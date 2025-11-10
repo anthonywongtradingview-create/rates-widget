@@ -169,7 +169,7 @@ function renderEventsTable(id, events, limit = 10) {
         <td>${ev.currency}</td>
         <td>${ev.importance}</td>
         <td>${ev.event}</td>
-        <td>${insightsCell}</td> <!-- ✅ this column now always appears -->
+        <td>${insightsCell}</td>
       </tr>`;
   }).join("");
 
