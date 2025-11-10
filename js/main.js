@@ -52,15 +52,51 @@ async function fetchCSV(url) {
   return await res.text();
 }
 
-// === PARSE CSV (for FX main sheet) ===
-function parseCSV(text) {
+// === Parse events CSV (adds Insights, skips header notes, keeps rest intact) ===
+function parseEventsCSV(text) {
+  // Split into lines and skip blank / metadata ones
   const lines = text.trim().split(/\r?\n/);
-  const header = lines.shift().split(",").map((h) => h.trim().toLowerCase());
+  // Find the actual header row (the one containing "date_and_time")
+  const headerIndex = lines.findIndex(l => l.toLowerCase().includes("date_and_time"));
+  if (headerIndex === -1) return [];
 
-  return lines.map((line) => {
-    const cols = line.split(",").map((c) => c.replace(/^"|"$/g, "").trim());
-    return Object.fromEntries(header.map((h, i) => [h, cols[i]]));
-  });
+  // Extract header and data rows
+  const header = lines[headerIndex].split(",").map(h => h.trim().toLowerCase());
+  const rows = lines.slice(headerIndex + 1);
+
+  const idx = {
+    datetime: header.indexOf("date_and_time"),
+    currency: header.indexOf("currency"),
+    importance: header.indexOf("importance"),
+    event: header.indexOf("event"),
+    actual: header.indexOf("actual"),
+    forecast: header.indexOf("forecast"),
+    previous: header.indexOf("previous"),
+    insights: header.indexOf("insights"),
+  };
+
+  return rows
+    .map(line => {
+      // Parse each line safely (handles quoted commas)
+      const cols = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c =>
+        c.replace(/^"|"$/g, "").trim()
+      ) || [];
+
+      const datetimeRaw = cols[idx.datetime];
+
+      return {
+        datetime: new Date(datetimeRaw),
+        currency: cols[idx.currency],
+        importance: cols[idx.importance],
+        event: cols[idx.event],
+        actual: cols[idx.actual],
+        forecast: cols[idx.forecast],
+        previous: cols[idx.previous],
+        insights: idx.insights >= 0 ? (cols[idx.insights] || "") : ""
+      };
+    })
+    .filter(e => e.datetime instanceof Date && !isNaN(e.datetime))
+    .sort((a, b) => a.datetime - b.datetime);
 }
 
 // === UTIL: Convert "DD-MMM-YYYY" to JS Date ===
