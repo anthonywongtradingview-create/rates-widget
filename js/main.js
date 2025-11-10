@@ -152,7 +152,6 @@ function renderEventsTable(id, events, limit = 10) {
         })
       : "";
 
-    // Handle Insights column (can contain hyperlink)
     let link = ev.insights || "";
     link = link.replace(/^"+|"+$/g, "").trim();
 
@@ -239,7 +238,20 @@ async function main() {
 
     // === EVENTS ===
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
-    const events = parseEventsCSV(eventsCSV);
+    let events = parseEventsCSV(eventsCSV);
+
+    // === Filter only relevant upcoming events for current pair ===
+    const now = new Date();
+    events = events
+      .filter(ev =>
+        ev.currency &&
+        (ev.currency.toUpperCase() === BASE.toUpperCase() ||
+         ev.currency.toUpperCase() === QUOTE.toUpperCase()) &&
+        new Date(ev.datetime) >= now
+      )
+      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
+      .slice(0, 10); // next 10 events
+
     renderEventsTable("upcomingEvents", events, 10);
 
     // === CALCULATION LOGIC ===
