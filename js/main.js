@@ -142,15 +142,21 @@ function renderEventsTable(id, events, limit = 10) {
   }
 
   const rows = events.slice(0, limit).map(ev => {
-    const dateStr = ev.datetime
-      ? new Date(ev.datetime).toLocaleString("en-GB", {
+    // ✅ Fix for Google Sheets format like "13-Nov-2025 08:00"
+    let dateStr = "";
+    if (ev.datetime) {
+      const cleanDate = ev.datetime.replace(/-/g, " "); // convert hyphens to spaces
+      const parsed = new Date(cleanDate);
+      if (!isNaN(parsed)) {
+        dateStr = parsed.toLocaleString("en-GB", {
           day: "2-digit",
           month: "short",
           year: "numeric",
           hour: "2-digit",
           minute: "2-digit",
-        })
-      : "";
+        });
+      }
+    }
 
     // Handle Insights column (can contain hyperlink)
     let link = ev.insights || "";
@@ -163,23 +169,23 @@ function renderEventsTable(id, events, limit = 10) {
 
     return `
       <tr>
-        <td style="width:22%;white-space:nowrap;">${dateStr}</td>
-        <td style="width:10%;text-align:center;">${ev.currency}</td>
-        <td style="width:18%;text-align:center;">${ev.importance}</td>
-        <td style="width:40%;">${ev.event}</td>
-        <td style="width:10%;text-align:center;">${insightsCell}</td>
+        <td>${dateStr}</td>
+        <td>${ev.currency}</td>
+        <td>${ev.importance}</td>
+        <td>${ev.event}</td>
+        <td>${insightsCell}</td>
       </tr>`;
   }).join("");
 
   el.innerHTML = `
-    <table class="events-table" style="font-size:13px;width:100%;border-collapse:collapse;table-layout:fixed;">
+    <table class="events-table" style="font-size:13px; width:100%; border-collapse:collapse;">
       <thead>
         <tr>
-          <th style="width:22%;">Date & Time</th>
-          <th style="width:10%;">Currency</th>
-          <th style="width:18%;">Importance</th>
-          <th style="width:40%;">Event</th>
-          <th style="width:10%;">Insights</th>
+          <th>Date & Time</th>
+          <th>Currency</th>
+          <th>Importance</th>
+          <th>Event</th>
+          <th>Insights</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
