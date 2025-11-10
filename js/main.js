@@ -142,23 +142,31 @@ function renderEventsTable(id, events, limit = 10) {
   }
 
   const rows = events.slice(0, limit).map(ev => {
-    // ✅ Fix for Google Sheets format like "13-Nov-2025 08:00"
     let dateStr = "";
+
     if (ev.datetime) {
-      const cleanDate = ev.datetime.replace(/-/g, " "); // convert hyphens to spaces
-      const parsed = new Date(cleanDate);
-      if (!isNaN(parsed)) {
-        dateStr = parsed.toLocaleString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+      // ✅ Fix for Google Sheets "MM/DD/YYYY HH:MM:SS"
+      // Convert to ISO string the browser can read
+      const parts = ev.datetime.trim().split(" ");
+      if (parts.length >= 2) {
+        const [datePart, timePart] = parts;
+        const [month, day, year] = datePart.split("/");
+        const isoString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${timePart}`;
+        const parsed = new Date(isoString);
+
+        if (!isNaN(parsed)) {
+          dateStr = parsed.toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
       }
     }
 
-    // Handle Insights column (can contain hyperlink)
+    // === Insights column (unchanged) ===
     let link = ev.insights || "";
     link = link.replace(/^"+|"+$/g, "").trim();
 
@@ -191,7 +199,7 @@ function renderEventsTable(id, events, limit = 10) {
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Add colored blocks to Importance ===
+  // === Importance coloring (unchanged) ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
