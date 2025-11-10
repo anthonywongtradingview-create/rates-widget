@@ -1,1 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EUR/AED – Weekly Analysis</title>
+
+  <!-- ✅ Link shared site CSS (go up 2 levels) -->
+  <link rel="stylesheet" href="../../css/styles.css" />
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: #0d1117;
+      color: #f0f6fc;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #161b22;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #30363d;
+    }
+
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+      color: #58a6ff;
+    }
+
+    header a {
+      color: #8b949e;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s ease;
+    }
+
+    header a:hover {
+      color: #58a6ff;
+    }
+
+    main {
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .chart-container {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(0,0,0,0.3);
+    }
+
+    iframe {
+      width: 100%;
+      height: 620px;
+      border: none;
+    }
+
+    .summary {
+      margin-top: 24px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>EUR/AED – Weekly Analysis</h1>
+    <!-- ✅ Back to main menu at site root -->
+    <a href="../../index.html">← Back to Main Menu</a>
+  </header>
+
+  <main>
+    <div class="chart-container">
+      <!-- ✅ Chart file for this pair -->
+      <iframe src="EURAED_last_week.html" title="EURAED Weekly Chart"></iframe>
+    </div>
+
+    <div class="summary">
+      <h2 style="font-size:16px; color:#58a6ff;">Summary</h2>
+      <p>
+        This interactive chart displays the EUR/AED hourly candlesticks over the past week,
+        highlighting key price levels and annotated economic events retrieved directly from your Google Sheets feed.
+      </p>
+      <p>
+        Hover over any event marker for details on forecast, actual, and previous values.
+      </p>
+    </div>
+  </main>
+
+  <!-- ✅ Shared JavaScript (go up 2 levels) -->
+  <script src="../../js/main.js"></script>
+</body>
+</html>
 
