@@ -133,6 +133,7 @@ function renderCombinedTable(id, holidays) {
 // === Render economic events table (with Insights column) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
+  console.log("Rendering events table, total:", events.length);
   if (!el) return;
 
   if (!events.length) {
