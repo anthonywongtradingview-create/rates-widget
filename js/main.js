@@ -59,11 +59,12 @@ function parseCSV(text) {
   });
 }
 
-// === Parse events CSV (skips metadata & includes insights column) ===
+// === Parse events CSV (handles metadata + date fix + insights) ===
 function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const headerIndex = lines.findIndex(l => l.toLowerCase().includes("date_and_time"));
   if (headerIndex === -1) return [];
+
   const header = lines[headerIndex].split(",").map(h => h.trim().toLowerCase());
   const rows = lines.slice(headerIndex + 1);
 
@@ -83,9 +84,24 @@ function parseEventsCSV(text) {
       const cols = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c =>
         c.replace(/^"|"$/g, "").trim()
       ) || [];
+
       const datetimeRaw = cols[idx.datetime];
+
+      // ✅ Robust parse for "13-Nov-2025 08:00"
+      const parsedDate = (() => {
+        if (!datetimeRaw) return null;
+        const [d, mon, y, t] = datetimeRaw.split(/[\s-]+/);
+        const months = {
+          Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+          Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+        };
+        const hours = t ? parseInt(t.split(":")[0]) : 0;
+        const minutes = t ? parseInt(t.split(":")[1]) : 0;
+        return new Date(y, months[mon.substring(0, 3)], d, hours, minutes);
+      })();
+
       return {
-        datetime: new Date(datetimeRaw),
+        datetime: parsedDate,
         currency: cols[idx.currency],
         importance: cols[idx.importance],
         event: cols[idx.event],
@@ -137,6 +153,7 @@ function renderEventsTable(id, events, limit = 10) {
     el.innerHTML = "<p>No upcoming events found.</p>";
     return;
   }
+
   const rows = events.slice(0, limit).map(ev => {
     const insightsButton = ev.insights
       ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
@@ -150,6 +167,7 @@ function renderEventsTable(id, events, limit = 10) {
         <td>${insightsButton}</td>
       </tr>`;
   }).join("");
+
   el.innerHTML = `
     <table class="events-table" style="font-size:13px;">
       <thead>
@@ -163,6 +181,8 @@ function renderEventsTable(id, events, limit = 10) {
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
+
+  // Convert numeric importance to color blocks
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
