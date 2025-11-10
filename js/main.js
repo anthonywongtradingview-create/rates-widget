@@ -154,9 +154,11 @@ function renderEventsTable(id, events, limit = 10) {
       : "";
 
   // ✅ Force link rendering as HTML even if empty string
-    const link = ev.insights ? ev.insights.replace(/^"+|"+$/g, "").trim() : "";
+    let link = ev.insights || "";
+    link = link.replace(/^"+|"+$/g, "").trim(); // strip stray quotes
+    console.log("Link parsed:", link); // debug
     const insightsCell =
-      link.startsWith("http")
+      link && link.includes("http")
         ? `<a href="${link}" target="_blank" class="insight-btn">View</a>`
         : `<span style="color:#ccc;">—</span>`;
 
