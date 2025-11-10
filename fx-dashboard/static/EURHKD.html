@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FX Dashboard – EUR/HKD</title>
+
+  <!-- Shared stylesheet (go up two levels from /fx-dashboard/static/) -->
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>FX Dashboard – EUR/HKD</h1>
+    <nav class="site-nav">
+      <!-- Home link: go up two levels -->
+      <a href="../../index.html">Home</a>
+      <a href="EURHKD.html">EURHKD</a>
+    </nav>
+  </header>
+
+  <div class="panel">
+    <label>Margin (%):
+      <select id="margin"></select>
+    </label>
+    <label>Volume:
+      <select id="volume"></select>
+    </label>
+    <label>Or type your exact value here:
+      <input type="number" id="customVolume" placeholder="Enter amount" style="width:120px;" />
+    </label>
+    <label>
+      <input type="checkbox" id="useCustomVolume" />
+      Use exact value?
+    </label>
+  </div>
+
+  <div class="info">
+    <!-- Rates Table -->
+    <table class="rates-table">
+      <thead>
+        <tr>
+          <th colspan="2">
+            <div class="rates-header">
+              <div class="rates-left">
+                What we can offer at — <span id="lastUpdate">–</span>
+              </div>
+              <div class="rates-right">
+                Market Rate: <span id="marketRate">–</span>
+              </div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EUR&gt;HKD</strong></td>
+          <td id="offerRate">–</td>
+        </tr>
+        <tr>
+          <td><strong>HKD&gt;EUR</strong></td>
+          <td id="inverseRate">–</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Offer Table -->
+    <table class="offer-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>For Exchange Amount</th>
+          <th>We Can Offer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EUR&gt;HKD</strong></td>
+          <td id="exchangeEUR">–</td>
+          <td id="offerAmount">–</td>
+        </tr>
+        <tr>
+          <td><strong>HKD&gt;EUR</strong></td>
+          <td id="exchangeUSD">–</td>
+          <td id="inverseAmount">–</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Revenue Table -->
+    <table class="revenue-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Expected Trading Revenue (Estimates)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EUR&gt;HKD</strong></td>
+          <td id="revenueEURUSD">–</td>
+        </tr>
+        <tr>
+          <td><strong>HKD&gt;EUR</strong></td>
+          <td id="revenueUSDEUR">–</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Next 5 Settlement Holidays (EUR or HKD)</h2>
+  <div id="combinedHolidays"></div>
+
+  <h2>Upcoming Economic Events</h2>
+  <div id="upcomingEvents"></div>
+
+  <!-- Currency Pair Config -->
+  <script>
+    window.BASE = "EUR";
+    window.QUOTE = "HKD";
+  </script>
+
+  <!-- Shared JavaScript (go up two levels) -->
+  <script src="../../js/main.js?v=3"></script>
+</body>
+</html>
