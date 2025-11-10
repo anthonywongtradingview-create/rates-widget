@@ -157,27 +157,39 @@ function renderEventsTable(id, events, limit = 10) {
     let dateStr = "";
 
     if (ev.datetime) {
-      // Google Sheets format: "MM/DD/YYYY HH:MM:SS"
-      const parts = ev.datetime.trim().split(" ");
-      if (parts.length >= 2) {
-        const [datePart, timePart] = parts;
-        const [month, day, year] = datePart.split("/");
-        if (month && day && year) {
-          const isoString = `${year}-${month.padStart(2, "0")}-${day.padStart(
-            2,
-            "0"
-          )}T${timePart}`;
-          const parsed = new Date(isoString);
-          if (!isNaN(parsed)) {
-            dateStr = parsed.toLocaleString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-          }
-        }
+      const raw = ev.datetime.trim();
+      let parsed = null;
+
+      // 1) Try Google Sheets style "MM/DD/YYYY HH:MM[:SS]"
+      const m = raw.match(
+        /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}:\d{2}(?::\d{2})?)$/
+      );
+      if (m) {
+        const [, month, day, year, timePart] = m;
+        const iso = `${year}-${month.padStart(2, "0")}-${day.padStart(
+          2,
+          "0"
+        )}T${timePart}`;
+        parsed = new Date(iso);
+      }
+
+      // 2) Fallback: let the browser try whatever format it is
+      if (!parsed || isNaN(parsed)) {
+        const tryNative = new Date(raw);
+        if (!isNaN(tryNative)) parsed = tryNative;
+      }
+
+      // 3) If we have a valid Date, format nicely; otherwise show raw text
+      if (parsed && !isNaN(parsed)) {
+        dateStr = parsed.toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } else {
+        dateStr = raw; // last resort: at least show something
       }
     }
 
@@ -188,9 +200,7 @@ function renderEventsTable(id, events, limit = 10) {
     const insightsCell =
       link && link.startsWith("http")
         ? `<a href="${link}" target="_blank" class="insight-btn">View</a>`
-        : link
-        ? `<span>${link}</span>`
-        : `<span style="color:#ccc;">—</span>`;
+        : (link ? `<span>${link}</span>` : `<span style="color:#ccc;">—</span>`);
 
     return `
       <tr>
