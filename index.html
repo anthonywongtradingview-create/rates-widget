@@ -21,7 +21,7 @@
     table {
       border-collapse: collapse;
       width: 100%;
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       background: #fff;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -65,6 +65,14 @@
     .btn-analysis:hover {
       background: #1e7e34;
     }
+    .group-header {
+      background: #343a40;
+      color: #fff;
+      font-weight: bold;
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 17px;
+    }
     footer {
       text-align: center;
       font-size: 13px;
@@ -85,41 +93,33 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td><strong>EUR / USD</strong></td>
-        <td>
-          <a href="fx-dashboard/static/EURUSD.html" class="btn">View Dashboard</a>
-          <a href="fx-dashboard/output/EURUSD_Analysis" class="btn btn-analysis">Analysis</a>
-        </td>
-      </tr>
-      <tr>
-        <td><strong>EUR / GBP</strong></td>
-        <td>
-          <a href="fx-dashboard/static/EURGBP.html" class="btn">View Dashboard</a>
-          <a href="EURGBP_Analysis.html" class="btn btn-analysis">Analysis</a>
-        </td>
-      </tr>
-      <tr>
-        <td><strong>GBP / USD</strong></td>
-        <td>
-          <a href="fx-dashboard/static/GBPUSD.html" class="btn">View Dashboard</a>
-          <a href="GBPUSD_Analysis.html" class="btn btn-analysis">Analysis</a>
-        </td>
-      </tr>
-      <tr>
-        <td><strong>EUR / CHF</strong></td>
-        <td>
-          <a href="fx-dashboard/static/EURCHF.html" class="btn">View Dashboard</a>
-          <a href="EURCHF_Analysis.html" class="btn btn-analysis">Analysis</a>
-        </td>
-      </tr>
-      <tr>
-        <td><strong>EUR / AED</strong></td>
-        <td>
-          <a href="fx-dashboard/static/EURAED.html" class="btn">View Dashboard</a>
-          <a href="EURAED_Analysis.html" class="btn btn-analysis">Analysis</a>
-        </td>
-      </tr>
+      <!-- === EUR Pairs === -->
+      <tr><td colspan="2" class="group-header">EUR Pairs</td></tr>
+      <tr><td><strong>EUR / USD</strong></td><td><a href="fx-dashboard/static/EURUSD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURUSD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>EUR / GBP</strong></td><td><a href="fx-dashboard/static/EURGBP.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURGBP_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>EUR / CHF</strong></td><td><a href="fx-dashboard/static/EURCHF.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURCHF_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>EUR / AED</strong></td><td><a href="fx-dashboard/static/EURAED.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURAED_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>EUR / CNY</strong></td><td><a href="fx-dashboard/static/EURCNY.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURCNY_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>EUR / HKD</strong></td><td><a href="fx-dashboard/static/EURHKD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURHKD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>EUR / PLN</strong></td><td><a href="fx-dashboard/static/EURPLN.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURPLN_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>EUR / RUB</strong></td><td><a href="fx-dashboard/static/EURRUB.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURRUB_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+
+      <!-- === GBP Pairs === -->
+      <tr><td colspan="2" class="group-header">GBP Pairs</td></tr>
+      <tr><td><strong>GBP / USD</strong></td><td><a href="fx-dashboard/static/GBPUSD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/GBPUSD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>GBP / AED</strong></td><td><a href="fx-dashboard/static/GBPAED.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/GBPAED_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+
+      <!-- === USD Pairs === -->
+      <tr><td colspan="2" class="group-header">USD Pairs</td></tr>
+      <tr><td><strong>USD / AED</strong></td><td><a href="fx-dashboard/static/USDAED.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDAED_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>USD / CHF</strong></td><td><a href="fx-dashboard/static/USDCHF.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDCHF_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>USD / HKD</strong></td><td><a href="fx-dashboard/static/USDHKD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDHKD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>USD / PLN</strong></td><td><a href="fx-dashboard/static/USDPLN.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDPLN_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr><td><strong>USD / SGD</strong></td><td><a href="fx-dashboard/static/USDSGD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDSGD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+
+      <!-- === AUD Pairs === -->
+      <tr><td colspan="2" class="group-header">AUD Pairs</td></tr>
+      <tr><td><strong>AUD / USD</strong></td><td><a href="fx-dashboard/static/AUDUSD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/AUDUSD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
     </tbody>
   </table>
 
