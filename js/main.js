@@ -142,40 +142,25 @@ function renderEventsTable(id, events, limit = 10) {
   }
 
   const rows = events.slice(0, limit).map(ev => {
-    // === DATE FORMATTING (Restored reliable logic) ===
-    let dateStr = ev.datetime || "";
-    if (dateStr) {
-      // Try to interpret manually formatted Investing.com style dates
-      // e.g. "13 Nov 2025, 08:00"
-      const parts = dateStr.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4}),?\s*(\d{1,2}:\d{2})?/);
-      if (parts) {
-        const [_, day, mon, year, time] = parts;
-        const months = {
-          Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-          Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
-        };
-        const jsDate = new Date(year, months[mon] ?? 0, day, ...(time ? time.split(":") : [0, 0]));
-        dateStr = jsDate.toLocaleString("en-GB", {
+    const dateStr = ev.datetime
+      ? new Date(ev.datetime).toLocaleString("en-GB", {
           day: "2-digit",
           month: "short",
           year: "numeric",
           hour: "2-digit",
           minute: "2-digit",
-        });
-      }
-    } else {
-      dateStr = "—";
-    }
+        })
+      : "";
 
-    // === Handle Insights column ===
+    // Handle Insights column (can contain hyperlink)
     let link = ev.insights || "";
     link = link.replace(/^"+|"+$/g, "").trim();
+
     const insightsCell =
       link && link.startsWith("http")
         ? `<a href="${link}" target="_blank" class="insight-btn">View</a>`
         : (link ? `<span>${link}</span>` : `<span style="color:#ccc;">—</span>`);
 
-    // === Row HTML ===
     return `
       <tr>
         <td style="width:22%;white-space:nowrap;">${dateStr}</td>
@@ -200,7 +185,7 @@ function renderEventsTable(id, events, limit = 10) {
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Importance coloring ===
+  // === Add colored blocks to Importance ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
@@ -217,6 +202,7 @@ function renderEventsTable(id, events, limit = 10) {
     cell.innerHTML = html;
   });
 }
+
 
 // === MAIN ===
 async function main() {
