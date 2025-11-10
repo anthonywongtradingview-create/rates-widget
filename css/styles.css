@@ -91,13 +91,9 @@ td:first-child {
   width: 28%;
 }
 th:nth-child(2),
-td:nth-child(2) {
-  width: 24%;
-}
+td:nth-child(2),
 th:nth-child(3),
-td:nth-child(3) {
-  width: 24%;
-}
+td:nth-child(3),
 th:nth-child(4),
 td:nth-child(4) {
   width: 24%;
@@ -115,8 +111,6 @@ th {
 }
 
 /* === Table Styles (Google Sheets aesthetic) === */
-
-/* Rates Table */
 .rates-table thead th {
   background-color: #d8f4d1;
 }
@@ -143,11 +137,6 @@ th {
   font-weight: 600;
   color: #333;
   font-size: 15px;
-}
-
-.rates-table thead th {
-  background-color: #d8f4d1;
-  padding: 12px 0;
 }
 
 /* Offer Table */
@@ -178,7 +167,7 @@ th {
 #combinedHolidays {
   max-width: 700px;
   margin: 30px auto;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: inherit;
 }
 
 #combinedHolidays table {
@@ -213,129 +202,7 @@ th {
   background-color: #f0f7ff;
 }
 
-#combinedHolidays tr:last-child td {
-  border-bottom: none;
-}
-
-h2 {
-  text-align: center;
-  margin-top: 40px;
-  font-size: 20px;
-  color: #111;
-  font-weight: 700;
-}
-
-/* === Modernized Upcoming Economic Events Table === */
-#upcomingEvents {
-  max-width: 1000px;
-  margin: 40px auto;
-  overflow-x: auto;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-#upcomingEvents table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  background: #fff;
-}
-
-/* Header styling */
-#upcomingEvents th {
-  background: linear-gradient(to right, #f3f3f3, #ececec);
-  color: #222;
-  font-weight: 600;
-  padding: 12px 14px;
-  text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-/* Data cells */
-#upcomingEvents td {
-  padding: 10px 14px;
-  font-size: 14px;
-  border-bottom: 1px solid #eee;
-  color: #333;
-  line-height: 1.5;
-  text-align: center;
-  vertical-align: middle;
-}
-
-/* Adjust column widths */
-#upcomingEvents th:nth-child(2),
-#upcomingEvents td:nth-child(2) {
-  width: 6%;
-}
-
-#upcomingEvents th:nth-child(4),
-#upcomingEvents td:nth-child(4) {
-  width: 40%;
-}
-
-/* Alternate row shading */
-#upcomingEvents tr:nth-child(even) td {
-  background-color: #fafafa;
-}
-
-/* Subtle hover effect */
-#upcomingEvents tr:hover td {
-  background-color: #f0f7ff;
-}
-
-#upcomingEvents tr:last-child td {
-  border-bottom: none;
-}
-
-#upcomingEvents table {
-  transition: all 0.2s ease-in-out;
-}
-
-#upcomingEvents th:first-child {
-  border-top-left-radius: 12px;
-}
-#upcomingEvents th:last-child {
-  border-top-right-radius: 12px;
-}
-
-/* === Intensity Bars === */
-.importance-blocks {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 3px;
-  width: 120px;
-  margin: 0 auto;
-  height: 14px;
-}
-
-.importance-blocks span {
-  display: inline-block;
-  width: 40px;
-  height: 10px;
-  border-radius: 3px;
-}
-
-.block-green  { background: #b5e7a0; }
-.block-orange { background: #ffd59e; }
-.block-red    { background: #ff9999; }
-.block-empty  { background: #eeeeee; }
-
-/* === Optional Polish === */
-.rates-table,
-.offer-table,
-.revenue-table {
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-
-/* === Section Titles (Finance Gradient Bar Style) === */
+/* === Section Titles === */
 h2 {
   position: relative;
   text-align: center;
@@ -358,7 +225,99 @@ h2::before {
   border-radius: 2px;
 }
 
-/* === FIX: Ensure Insights column always visible === */
+/* === Modernized Upcoming Economic Events Table === */
+#upcomingEvents {
+  max-width: 1000px;
+  margin: 40px auto;
+  overflow-x: auto;
+  font-family: inherit;
+}
+
+#upcomingEvents table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Header styling */
+#upcomingEvents th {
+  background: linear-gradient(to right, #f3f3f3, #ececec);
+  color: #222;
+  font-weight: 600;
+  padding: 12px 14px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+#upcomingEvents td {
+  padding: 10px 14px;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  line-height: 1.5;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Column widths */
+#upcomingEvents th:nth-child(2),
+#upcomingEvents td:nth-child(2) {
+  width: 6%;
+}
+#upcomingEvents th:nth-child(4),
+#upcomingEvents td:nth-child(4) {
+  width: 40%;
+}
+
+/* Alternate row shading & hover */
+#upcomingEvents tr:nth-child(even) td {
+  background-color: #fafafa;
+}
+#upcomingEvents tr:hover td {
+  background-color: #f0f7ff;
+}
+
+/* === Importance Bars === */
+.importance-blocks {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  width: 120px;
+  margin: 0 auto;
+  height: 14px;
+}
+
+.importance-blocks span {
+  display: inline-block;
+  width: 40px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.block-green  { background: #b5e7a0; }
+.block-orange { background: #ffd59e; }
+.block-red    { background: #ff9999; }
+.block-empty  { background: #eeeeee; }
+
+/* === Table Polish === */
+.rates-table,
+.offer-table,
+.revenue-table {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* === FIX: Ensure Insights column visible === */
 #upcomingEvents th:last-child,
 #upcomingEvents td:last-child {
   display: table-cell !important;
@@ -382,17 +341,9 @@ h2::before {
   font-weight: 500;
   transition: all 0.2s ease-in-out;
 }
+
 .insight-btn:hover {
   background: linear-gradient(90deg, #66bb6a, #57a95a);
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transform: translateY(-1px);
-}
-
-.insight-btn {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-size: 12px;
-  border: 1px solid #ccc;
 }
