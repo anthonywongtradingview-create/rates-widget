@@ -130,7 +130,7 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === Render economic events table (WITH Insights column) ===
+// === Render economic events table (with Insights column) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -140,38 +140,31 @@ function renderEventsTable(id, events, limit = 10) {
     return;
   }
 
-  const rows = events
-    .slice(0, limit)
-    .map((ev) => {
-      // ✅ Proper date display
-      const dateStr = ev.datetime
-        ? new Date(ev.datetime).toLocaleString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "";
+  const rows = events.slice(0, limit).map(ev => {
+    const dateStr = ev.datetime
+      ? new Date(ev.datetime).toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
 
-      // ✅ Create link button if there’s a URL
-      const insightsButton =
-        ev.insights && ev.insights.startsWith("http")
-          ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
-          : "";
+    const insightsCell = ev.insights && ev.insights.startsWith("http")
+      ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
+      : "";
 
-      return `
-        <tr>
-          <td>${dateStr}</td>
-          <td>${ev.currency}</td>
-          <td>${ev.importance}</td>
-          <td>${ev.event}</td>
-          <td>${insightsButton}</td>
-        </tr>`;
-    })
-    .join("");
+    return `
+      <tr>
+        <td>${dateStr}</td>
+        <td>${ev.currency}</td>
+        <td>${ev.importance}</td>
+        <td>${ev.event}</td>
+        <td>${insightsCell}</td>
+      </tr>`;
+  }).join("");
 
-  // ✅ Full table with Insights header
   el.innerHTML = `
     <table class="events-table" style="font-size:13px; width:100%;">
       <thead>
@@ -180,14 +173,14 @@ function renderEventsTable(id, events, limit = 10) {
           <th>Currency</th>
           <th>Importance</th>
           <th>Event</th>
-          <th>Insights</th>
+          <th>Insights</th> <!-- ✅ Ensure this exists -->
         </tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Convert numeric importance to colored bars ===
-  document.querySelectorAll(`#${id} td:nth-child(3)`).forEach((cell) => {
+  // === Add importance color bars ===
+  document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
     for (let i = 1; i <= 3; i++) {
