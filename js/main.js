@@ -140,6 +140,7 @@ function renderEventsTable(id, events, limit = 10) {
     return;
   }
 
+  // Build all rows
   const rows = events.slice(0, limit).map(ev => {
     const dateStr = ev.datetime
       ? new Date(ev.datetime).toLocaleString("en-GB", {
@@ -151,9 +152,11 @@ function renderEventsTable(id, events, limit = 10) {
         })
       : "";
 
-    const insightsCell = ev.insights && ev.insights.startsWith("http")
-      ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
-      : "";
+    // ✅ Force link rendering as HTML even if empty string
+    const insightsCell =
+      ev.insights && ev.insights.startsWith("http")
+        ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
+        : `<span style="color:#ccc;">—</span>`;
 
     return `
       <tr>
@@ -161,25 +164,26 @@ function renderEventsTable(id, events, limit = 10) {
         <td>${ev.currency}</td>
         <td>${ev.importance}</td>
         <td>${ev.event}</td>
-        <td>${insightsCell}</td>
+        <td>${insightsCell}</td> <!-- ✅ this column now always appears -->
       </tr>`;
   }).join("");
 
+  // ✅ Table with all 5 headers defined explicitly
   el.innerHTML = `
-    <table class="events-table" style="font-size:13px; width:100%;">
+    <table class="events-table" style="font-size:13px; width:100%; border-collapse:collapse;">
       <thead>
         <tr>
           <th>Date & Time</th>
           <th>Currency</th>
           <th>Importance</th>
           <th>Event</th>
-          <th>Insights</th> <!-- ✅ Ensure this exists -->
+          <th>Insights</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Add importance color bars ===
+  // === Add colored bars to Importance column ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
