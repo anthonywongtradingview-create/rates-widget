@@ -240,17 +240,14 @@ async function main() {
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
     let events = parseEventsCSV(eventsCSV);
 
-    // === Filter only relevant upcoming events for current pair ===
-    const now = new Date();
+    // Filter only events relevant to current pair (no date filter)
     events = events
       .filter(ev =>
         ev.currency &&
         (ev.currency.toUpperCase() === BASE.toUpperCase() ||
-         ev.currency.toUpperCase() === QUOTE.toUpperCase()) &&
-        new Date(ev.datetime) >= now
+         ev.currency.toUpperCase() === QUOTE.toUpperCase())
       )
-      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
-      .slice(0, 10); // next 10 events
+      .slice(0, 10); // next 10 for this pair
 
     renderEventsTable("upcomingEvents", events, 10);
 
