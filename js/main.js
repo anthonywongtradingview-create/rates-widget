@@ -142,49 +142,58 @@ function renderEventsTable(id, events, limit = 10) {
   }
 
   const rows = events.slice(0, limit).map(ev => {
-    const dateStr = ev.datetime
-      ? new Date(ev.datetime).toLocaleString("en-GB", {
+    // --- Date formatting fix ---
+    let dateStr = ev.datetime;
+    try {
+      // Try parse manually if not ISO
+      const parsed = new Date(ev.datetime.replace(",", ""));
+      if (!isNaN(parsed)) {
+        dateStr = parsed.toLocaleString("en-GB", {
           day: "2-digit",
           month: "short",
           year: "numeric",
           hour: "2-digit",
           minute: "2-digit",
-        })
-      : "";
+        });
+      }
+    } catch (err) {
+      console.warn("Date parse failed:", ev.datetime);
+    }
 
+    // --- Insights hyperlink handling ---
     let link = ev.insights || "";
     link = link.replace(/^"+|"+$/g, "").trim();
-
     const insightsCell =
       link && link.startsWith("http")
         ? `<a href="${link}" target="_blank" class="insight-btn">View</a>`
         : (link ? `<span>${link}</span>` : `<span style="color:#ccc;">—</span>`);
 
+    // --- Row HTML ---
     return `
       <tr>
-        <td>${dateStr}</td>
-        <td>${ev.currency}</td>
-        <td>${ev.importance}</td>
-        <td>${ev.event}</td>
-        <td>${insightsCell}</td>
+        <td style="width:22%;white-space:nowrap;">${dateStr}</td>
+        <td style="width:10%;text-align:center;">${ev.currency}</td>
+        <td style="width:18%;text-align:center;">${ev.importance}</td>
+        <td style="width:40%;">${ev.event}</td>
+        <td style="width:10%;text-align:center;">${insightsCell}</td>
       </tr>`;
   }).join("");
 
   el.innerHTML = `
-    <table class="events-table" style="font-size:13px; width:100%; border-collapse:collapse;">
+    <table class="events-table" style="font-size:13px;width:100%;border-collapse:collapse;table-layout:fixed;">
       <thead>
         <tr>
-          <th>Date & Time</th>
-          <th>Currency</th>
-          <th>Importance</th>
-          <th>Event</th>
-          <th>Insights</th>
+          <th style="width:22%;">Date & Time</th>
+          <th style="width:10%;">Currency</th>
+          <th style="width:18%;">Importance</th>
+          <th style="width:40%;">Event</th>
+          <th style="width:10%;">Insights</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Add colored blocks to Importance ===
+  // === Colored importance blocks ===
   document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
     const value = Number(cell.textContent.trim());
     let html = '<div class="importance-blocks">';
