@@ -5,16 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FX Dashboard – EUR/USD</title>
 
-  <!-- Shared stylesheet -->
-  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Shared stylesheet: go up two levels -->
+  <link rel="stylesheet" href="../../css/styles.css" />
 </head>
 <body>
   <header class="site-header">
     <h1>FX Dashboard – EUR/USD</h1>
     <nav class="site-nav">
-      <a href="index.html">Home</a>
+      <!-- Home is two levels up from here -->
+      <a href="../../index.html">Home</a>
+      <!-- This page is in the same folder, so this is okay -->
       <a href="EURUSD.html">EURUSD</a>
-      <!-- Add more pages as you create them, e.g. <a href="USDJPY.html">USDJPY</a> -->
     </nav>
   </header>
 
@@ -34,8 +35,8 @@
     </label>
   </div>
 
-  
   <div class="info">
+    <!-- (tables unchanged) -->
     <table class="rates-table">
       <thead>
         <tr>
@@ -63,7 +64,6 @@
       </tbody>
     </table>
 
-  
     <table class="offer-table">
       <thead>
         <tr>
@@ -85,6 +85,7 @@
         </tr>
       </tbody>
     </table>
+
     <table class="revenue-table">
       <thead>
         <tr>
@@ -105,14 +106,19 @@
     </table>
   </div>
 
-
   <h2>Next 5 Settlement Holidays (EUR or USD)</h2>
   <div id="combinedHolidays"></div>
 
   <h2>Upcoming Economic Events</h2>
   <div id="upcomingEvents"></div>
 
-  <!-- Shared JavaScript -->
-  <script src="js/main.js?v=3"></script>
+  <!-- Tell JS which pair this page is for -->
+  <script>
+    window.BASE = "EUR";
+    window.QUOTE = "USD";
+  </script>
+
+  <!-- Shared JavaScript: go up two levels -->
+  <script src="../../js/main.js?v=3"></script>
 </body>
 </html>
