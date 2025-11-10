@@ -31,13 +31,12 @@ body {
   padding: 15px 25px;
   border-radius: 8px;
   margin: 0 auto 30px auto;
-  max-width: 850px;             /* keeps it from stretching too wide */
-  
+  max-width: 850px;
   display: flex;
-  justify-content: center;      /* ✅ centers content horizontally */
-  align-items: center;          /* ✅ vertically aligns inputs */
-  flex-wrap: wrap;              /* ✅ ensures responsiveness on smaller screens */
-  gap: 15px;                    /* even spacing between items */
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
@@ -66,7 +65,7 @@ body {
 
 /* === Info Section (tables container) === */
 .info {
-  max-width: 950px; /* constrains table width */
+  max-width: 950px;
   margin: 0 auto;
 }
 
@@ -74,7 +73,7 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; /* prevents auto-stretching */
+  table-layout: fixed;
   margin-top: 20px;
 }
 
@@ -132,7 +131,7 @@ th {
 /* === Rates Header Flex Layout === */
 .rates-header {
   display: flex;
-  justify-content: space-between;   /* ✅ left + right alignment */
+  justify-content: space-between;
   align-items: center;
   padding: 0 16px;
   width: 100%;
@@ -146,12 +145,10 @@ th {
   font-size: 15px;
 }
 
-/* Match header background color */
 .rates-table thead th {
   background-color: #d8f4d1;
   padding: 12px 0;
 }
-
 
 /* Offer Table */
 .offer-table thead th {
@@ -209,11 +206,11 @@ th {
 }
 
 #combinedHolidays tr:nth-child(even) td {
-  background-color: #fafafa; /* Shaded every two rows */
+  background-color: #fafafa;
 }
 
 #combinedHolidays tr:hover td {
-  background-color: #f0f7ff; /* Subtle hover effect */
+  background-color: #f0f7ff;
 }
 
 #combinedHolidays tr:last-child td {
@@ -228,8 +225,7 @@ h2 {
   font-weight: 700;
 }
 
-
-/* === Modernized Upcoming Economic Events Table (Refined Layout) === */
+/* === Modernized Upcoming Economic Events Table === */
 #upcomingEvents {
   max-width: 1000px;
   margin: 40px auto;
@@ -253,7 +249,7 @@ h2 {
   color: #222;
   font-weight: 600;
   padding: 12px 14px;
-  text-align: center; /* ✅ centered headers */
+  text-align: center;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -267,19 +263,19 @@ h2 {
   border-bottom: 1px solid #eee;
   color: #333;
   line-height: 1.5;
-  text-align: center; /* ✅ centered content */
+  text-align: center;
   vertical-align: middle;
 }
 
 /* Adjust column widths */
 #upcomingEvents th:nth-child(2),
 #upcomingEvents td:nth-child(2) {
-  width: 6%; /* Currency column - half width */
+  width: 6%;
 }
 
 #upcomingEvents th:nth-child(4),
 #upcomingEvents td:nth-child(4) {
-  width: 40%; /* Event column - double width */
+  width: 40%;
 }
 
 /* Alternate row shading */
@@ -292,7 +288,6 @@ h2 {
   background-color: #f0f7ff;
 }
 
-/* Round corners + last row cleanup */
 #upcomingEvents tr:last-child td {
   border-bottom: none;
 }
@@ -308,38 +303,27 @@ h2 {
   border-top-right-radius: 12px;
 }
 
-/* === Intensity Bars (Centered + 50px wide) === */
+/* === Intensity Bars === */
 .importance-blocks {
   display: flex;
-  justify-content: center;    /* ✅ center horizontally */
-  align-items: center;        /* ✅ center vertically */
+  justify-content: center;
+  align-items: center;
   gap: 3px;
-  width: 120px;                /* ✅ total bar width */
-  margin: 0 auto;             /* ensures centering in table cell */
+  width: 120px;
+  margin: 0 auto;
   height: 14px;
 }
 
 .importance-blocks span {
   display: inline-block;
-  width: 40px;                /* roughly 1/3 of 50px width */
+  width: 40px;
   height: 10px;
   border-radius: 3px;
 }
 
-/* Active segment colors */
-.block-green  { background: #b5e7a0; }   /* light matte green */
-.block-orange { background: #ffd59e; }   /* light matte orange */
-.block-red    { background: #ff9999; }   /* matte red */
-
-/* Inactive segment */
-.block-empty  { background: #eeeeee; }
-
-/* Colors for active segments */
-.block-green  { background: #b5e7a0; }   /* light matte green */
-.block-orange { background: #ffd59e; }   /* light matte orange */
-.block-red    { background: #ff9999; }   /* matte red */
-
-/* Inactive / empty segments */
+.block-green  { background: #b5e7a0; }
+.block-orange { background: #ffd59e; }
+.block-red    { background: #ff9999; }
 .block-empty  { background: #eeeeee; }
 
 /* === Optional Polish === */
@@ -362,17 +346,27 @@ h2 {
   letter-spacing: 0.5px;
 }
 
-/* Gradient underline effect */
 h2::before {
   content: "";
   position: absolute;
-  top: 100%;                 /* places the bar just under the text */
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  width: 500px;              /* length of the bar */
+  width: 500px;
   height: 8px;
-  background: linear-gradient(90deg, #4caf50, #ffb74d); /* green→orange gradient */
+  background: linear-gradient(90deg, #4caf50, #ffb74d);
   border-radius: 2px;
+}
+
+/* === FIX: Ensure Insights column always visible === */
+#upcomingEvents th:last-child,
+#upcomingEvents td:last-child {
+  display: table-cell !important;
+  width: 140px !important;
+  min-width: 120px !important;
+  text-align: center !important;
+  background-color: #fafafa;
+  border-left: 1px solid #ddd;
 }
 
 /* === Insight Button === */
@@ -402,4 +396,3 @@ h2::before {
   font-size: 12px;
   border: 1px solid #ccc;
 }
-
