@@ -67,6 +67,8 @@ function parseEventsCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
 
+  console.log("Parsed headers:", header);
+  
   const idx = {
     datetime: header.indexOf("date_and_time"),
     currency: header.indexOf("currency"),
