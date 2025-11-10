@@ -62,6 +62,7 @@ function parseCSV(text) {
   });
 }
 
+// === PARSE EVENTS CSV (with insights + date handling) ===
 function parseEventsCSV(text) {
   text = text.replace(/^\uFEFF/, ""); // remove BOM
 
@@ -71,6 +72,8 @@ function parseEventsCSV(text) {
   while (lines.length && !lines[0].toLowerCase().includes("date_and_time")) {
     lines.shift();
   }
+
+  if (!lines.length) return [];
 
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
   console.log("Parsed headers:", header);
@@ -91,9 +94,31 @@ function parseEventsCSV(text) {
       const cols = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
         ?.map(c => c.replace(/^"|"$/g, "").trim()) || [];
 
-      const datetimeRaw = cols[idx.datetime];
+      const datetimeRaw = cols[idx.datetime] || "";
+
+      // === Parse flexible date formats ===
+      let parsedDate = new Date(datetimeRaw);
+      if (isNaN(parsedDate)) {
+        const parts = datetimeRaw.match(
+          /(\d{1,2})[\/\-](\w+)[\/\-](\d{4})\s*(\d{1,2}:\d{2}:\d{2})?/
+        );
+        if (parts) {
+          const [_, d, m, y, t] = parts;
+          const monthNames = [
+            "jan","feb","mar","apr","may","jun",
+            "jul","aug","sep","oct","nov","dec"
+          ];
+          const monthIndex = isNaN(m)
+            ? monthNames.indexOf(m.toLowerCase()) + 1
+            : parseInt(m, 10);
+          parsedDate = new Date(
+            `${y}-${String(monthIndex).padStart(2, "0")}-${String(d).padStart(2, "0")}T${t || "00:00:00"}`
+          );
+        }
+      }
+
       return {
-        datetime: new Date(datetimeRaw),
+        datetime: parsedDate,
         currency: cols[idx.currency],
         importance: cols[idx.importance],
         event: cols[idx.event],
@@ -107,22 +132,11 @@ function parseEventsCSV(text) {
     .sort((a, b) => a.datetime - b.datetime);
 }
 
-
 // === UTIL: Convert "DD-MMM-YYYY" to JS Date ===
 function toDate(day, monAbbr, year) {
   const months = [
-    "JAN",
-    "FEB",
-    "MAR",
-    "APR",
-    "MAY",
-    "JUN",
-    "JUL",
-    "AUG",
-    "SEP",
-    "OCT",
-    "NOV",
-    "DEC",
+    "JAN","FEB","MAR","APR","MAY","JUN",
+    "JUL","AUG","SEP","OCT","NOV","DEC",
   ];
   const m = months.indexOf(String(monAbbr).toUpperCase());
   return m >= 0 ? new Date(`${year}-${m + 1}-${day}`) : new Date();
@@ -140,12 +154,12 @@ function renderCombinedTable(id, holidays) {
 
   const rows = holidays
     .map(
-      (h) => `
-    <tr>
-      <td>${h.jsDate.toLocaleDateString()}</td>
-      <td>${h.region}</td>
-      <td>${h.name}</td>
-    </tr>`
+      h => `
+      <tr>
+        <td>${h.jsDate.toLocaleDateString()}</td>
+        <td>${h.region}</td>
+        <td>${h.name}</td>
+      </tr>`
     )
     .join("");
 
@@ -158,7 +172,7 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// === Render economic events table (original look + Insights column) ===
+// === Render economic events table (with Insights) ===
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -170,19 +184,18 @@ function renderEventsTable(id, events, limit = 10) {
 
   const rows = events
     .slice(0, limit)
-    .map((ev) => {
+    .map(ev => {
       const insightsButton = ev.insights
         ? `<a href="${ev.insights}" target="_blank" class="insight-btn">View</a>`
         : "";
-
       return `
-      <tr>
-        <td>${ev.datetime.toLocaleString()}</td>
-        <td>${ev.currency}</td>
-        <td>${ev.importance}</td>
-        <td>${ev.event}</td>
-        <td>${insightsButton}</td>
-      </tr>`;
+        <tr>
+          <td>${ev.datetime.toLocaleString()}</td>
+          <td>${ev.currency}</td>
+          <td>${ev.importance}</td>
+          <td>${ev.event}</td>
+          <td>${insightsButton}</td>
+        </tr>`;
     })
     .join("");
 
@@ -200,33 +213,31 @@ function renderEventsTable(id, events, limit = 10) {
       <tbody>${rows}</tbody>
     </table>`;
 
-  // === Convert numeric importance to color block bars (unchanged) ===
-  document
-    .querySelectorAll(`#${id} td:nth-child(3)`)
-    .forEach((cell) => {
-      const value = Number(cell.textContent.trim());
-      let html = '<div class="importance-blocks">';
-      for (let i = 1; i <= 3; i++) {
-        if (i <= value) {
-          if (value === 1) html += '<span class="block-green"></span>';
-          else if (value === 2) html += '<span class="block-orange"></span>';
-          else if (value === 3) html += '<span class="block-red"></span>';
-        } else {
-          html += '<span class="block-empty"></span>';
-        }
+  // Convert numeric importance to color block bars
+  document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
+    const value = Number(cell.textContent.trim());
+    let html = '<div class="importance-blocks">';
+    for (let i = 1; i <= 3; i++) {
+      if (i <= value) {
+        if (value === 1) html += '<span class="block-green"></span>';
+        else if (value === 2) html += '<span class="block-orange"></span>';
+        else if (value === 3) html += '<span class="block-red"></span>';
+      } else {
+        html += '<span class="block-empty"></span>';
       }
-      html += "</div>";
-      cell.innerHTML = html;
-    });
+    }
+    html += "</div>";
+    cell.innerHTML = html;
+  });
 }
 
-// === Main ===
+// === MAIN ===
 async function main() {
   try {
     const csvText = await fetchCSV(CSV_URL);
     const allRows = parseCSV(csvText);
 
-    const pair = allRows.find((r) => r.base === BASE && r.quote === QUOTE);
+    const pair = allRows.find(r => r.base === BASE && r.quote === QUOTE);
     if (!pair) throw new Error(`${BASE}/${QUOTE} not found in data`);
 
     const marketRate = parseFloat(pair.rate);
@@ -236,8 +247,8 @@ async function main() {
 
     // === HOLIDAYS ===
     const holidays = [];
-    allRows.forEach((row) => {
-      [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach((cur) => {
+    allRows.forEach(row => {
+      [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
         const year = row[`year_${cur}`];
         const month = row[`month_${cur}`];
         const day = row[`day_${cur}`];
@@ -254,7 +265,7 @@ async function main() {
 
     const today = new Date();
     const upcoming = holidays
-      .filter((h) => h.jsDate >= today)
+      .filter(h => h.jsDate >= today)
       .sort((a, b) => a.jsDate - b.jsDate)
       .slice(0, 5);
 
@@ -267,7 +278,7 @@ async function main() {
 
     renderEventsTable(
       "upcomingEvents",
-      events.filter((e) => e.datetime > now),
+      events.filter(e => e.datetime > now),
       10
     );
 
@@ -350,12 +361,8 @@ async function main() {
 
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
-    document
-      .getElementById("customVolume")
-      .addEventListener("input", recalc);
-    document
-      .getElementById("useCustomVolume")
-      .addEventListener("change", recalc);
+    document.getElementById("customVolume").addEventListener("input", recalc);
+    document.getElementById("useCustomVolume").addEventListener("change", recalc);
 
     recalc();
   } catch (e) {
@@ -365,3 +372,4 @@ async function main() {
 }
 
 main();
+
