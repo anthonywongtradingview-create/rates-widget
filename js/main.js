@@ -201,7 +201,6 @@ function renderEventsTable(id, events, limit = 10) {
   });
 }
 
-
 // === MAIN ===
 async function main() {
   try {
