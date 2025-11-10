@@ -62,13 +62,19 @@ function parseCSV(text) {
   });
 }
 
-// === Parse events CSV (original-style, just with Insights added) ===
 function parseEventsCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
+  text = text.replace(/^\uFEFF/, ""); // remove BOM
 
+  const lines = text.trim().split(/\r?\n/);
+
+  // 🔍 Skip any pre-header lines like "last updated: ..."
+  while (lines.length && !lines[0].toLowerCase().includes("date_and_time")) {
+    lines.shift();
+  }
+
+  const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
   console.log("Parsed headers:", header);
-  
+
   const idx = {
     datetime: header.indexOf("date_and_time"),
     currency: header.indexOf("currency"),
@@ -77,28 +83,30 @@ function parseEventsCSV(text) {
     actual: header.indexOf("actual"),
     forecast: header.indexOf("forecast"),
     previous: header.indexOf("previous"),
-    insights: header.indexOf("insights") // 👈 new field
+    insights: header.indexOf("insights"),
   };
 
   return lines
     .map(line => {
-      const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
-      const datetimeRaw = cols[idx.datetime];
+      const cols = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+        ?.map(c => c.replace(/^"|"$/g, "").trim()) || [];
 
+      const datetimeRaw = cols[idx.datetime];
       return {
-        datetime: new Date(datetimeRaw),        // same as before
+        datetime: new Date(datetimeRaw),
         currency: cols[idx.currency],
         importance: cols[idx.importance],
         event: cols[idx.event],
         actual: cols[idx.actual],
         forecast: cols[idx.forecast],
         previous: cols[idx.previous],
-        insights: idx.insights >= 0 ? (cols[idx.insights] || "") : "" // 👈 carry URL
+        insights: idx.insights >= 0 ? (cols[idx.insights] || "") : "",
       };
     })
     .filter(e => e.datetime instanceof Date && !isNaN(e.datetime))
     .sort((a, b) => a.datetime - b.datetime);
 }
+
 
 // === UTIL: Convert "DD-MMM-YYYY" to JS Date ===
 function toDate(day, monAbbr, year) {
