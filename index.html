@@ -187,6 +187,25 @@
         font-size: 13px;
       }
     }
+    /* === Fix Dashboard & Analysis button alignment === */
+    th:nth-child(2),
+    td.actions {
+      text-align: center !important;    /* center horizontally */
+      vertical-align: middle !important; /* center vertically */
+    }
+    
+    /* Make the buttons sit evenly side-by-side */
+    td.actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    /* Adjust row height for consistent spacing */
+    tr.data-row {
+      height: 64px;
+    }
   </style>
 </head>
 <body>
