@@ -8,124 +8,693 @@
   <style>
     body {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: #f8f9fa;
-      color: #111;
+      background: #0f172a;
+      color: #e5e7eb;
       margin: 0;
       padding: 20px;
     }
+
     h1 {
-      font-size: 24px;
+      font-size: 26px;
       text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .subheading {
+      text-align: center;
+      font-size: 14px;
+      color: #9ca3af;
       margin-bottom: 20px;
     }
+
+    .search-container {
+      max-width: 950px;
+      margin: 0 auto 18px auto;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .search-container label {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    #pairSearch {
+      flex: 1;
+      min-width: 180px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
-      max-width: 900px;
+      max-width: 950px;
       margin: 0 auto;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border-radius: 8px;
+      background: #020617;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      border-radius: 10px;
       overflow: hidden;
     }
+
     th, td {
-      padding: 14px 16px;
-      border-bottom: 1px solid #ddd;
-      text-align: center;
-      font-size: 16px;
+      padding: 12px 14px;
+      border-bottom: 1px solid #1f2937;
+      font-size: 14px;
     }
+
     th {
-      background: #007bff;
-      color: white;
+      background: #111827;
+      color: #e5e7eb;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      text-align: left;
     }
-    tr:hover td {
-      background-color: #f1f7ff;
+
+    td.actions {
+      text-align: right;
+      white-space: nowrap;
     }
+
+    tr.data-row:hover td {
+      background-color: #020617;
+    }
+
     .btn {
       display: inline-block;
-      padding: 8px 14px;
-      font-size: 14px;
-      background: #007bff;
+      padding: 7px 12px;
+      font-size: 13px;
+      background: #2563eb;
       color: white;
       border: none;
       border-radius: 6px;
       text-decoration: none;
       cursor: pointer;
-      transition: background 0.2s;
-      margin: 4px;
+      transition: background 0.15s, transform 0.05s;
+      margin-left: 6px;
     }
+
+    .btn:first-child {
+      margin-left: 0;
+    }
+
     .btn:hover {
-      background: #0056b3;
+      background: #1d4ed8;
+      transform: translateY(-1px);
     }
+
     .btn-analysis {
-      background: #28a745;
+      background: #22c55e;
     }
+
     .btn-analysis:hover {
-      background: #1e7e34;
+      background: #16a34a;
     }
+
+    .group-header-row td {
+      padding: 10px 14px;
+      background: #0b1120;
+      border-bottom: 1px solid #1f2937;
+    }
+
     .group-header {
-      background: #343a40;
-      color: #fff;
-      font-weight: bold;
-      text-align: left;
-      padding: 10px 16px;
-      font-size: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
     }
+
+    .group-header span.label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-toggle {
+      font-size: 18px;
+      opacity: 0.7;
+    }
+
+    .pair-name {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .flags {
+      font-size: 18px;
+    }
+
+    .pair-code {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .insight {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
     footer {
       text-align: center;
       font-size: 13px;
-      color: #777;
-      margin-top: 40px;
+      color: #6b7280;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 720px) {
+      th:nth-child(2),
+      td.actions {
+        text-align: left;
+      }
+
+      .btn {
+        margin-top: 4px;
+      }
+
+      table {
+        font-size: 13px;
+      }
     }
   </style>
 </head>
 <body>
 
   <h1>3S Terminal Dashboard – Main Menu</h1>
+  <div class="subheading">
+    Browse FX dashboards and weekly analysis. Use search to quickly find a pair.
+  </div>
+
+  <div class="search-container">
+    <label for="pairSearch">🔍 Search by pair, currency or region:</label>
+    <input
+      type="search"
+      id="pairSearch"
+      placeholder="e.g. EUR, JPY, ZAR, EURUSD, Asia..."
+    />
+  </div>
 
   <table>
     <thead>
       <tr>
         <th>Currency Pair</th>
-        <th>Dashboard</th>
+        <th style="text-align:right;">Dashboard &amp; Analysis</th>
       </tr>
     </thead>
-    <tbody>
-      <!-- === EUR Pairs === -->
-      <tr><td colspan="2" class="group-header">EUR Pairs</td></tr>
-      <tr><td><strong>EUR / USD</strong></td><td><a href="fx-dashboard/static/EURUSD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURUSD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>EUR / GBP</strong></td><td><a href="fx-dashboard/static/EURGBP.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURGBP_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>EUR / CHF</strong></td><td><a href="fx-dashboard/static/EURCHF.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURCHF_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>EUR / AED</strong></td><td><a href="fx-dashboard/static/EURAED.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURAED_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>EUR / CNY</strong></td><td><a href="fx-dashboard/static/EURCNY.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURCNY_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>EUR / HKD</strong></td><td><a href="fx-dashboard/static/EURHKD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURHKD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>EUR / PLN</strong></td><td><a href="fx-dashboard/static/EURPLN.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURPLN_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>EUR / RUB</strong></td><td><a href="fx-dashboard/static/EURRUB.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/EURRUB_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+    <tbody id="pairTableBody">
 
-      <!-- === GBP Pairs === -->
-      <tr><td colspan="2" class="group-header">GBP Pairs</td></tr>
-      <tr><td><strong>GBP / USD</strong></td><td><a href="fx-dashboard/static/GBPUSD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/GBPUSD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>GBP / AED</strong></td><td><a href="fx-dashboard/static/GBPAED.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/GBPAED_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <!-- ===== EUR GROUP ===== -->
+      <tr class="group-header-row">
+        <td colspan="2">
+          <div class="group-header" data-group-toggle="EUR">
+            <span class="label">
+              <span class="flags">🇪🇺</span>
+              EUR Pairs
+            </span>
+            <span class="group-toggle" id="toggleEUR">−</span>
+          </div>
+        </td>
+      </tr>
 
-      <!-- === USD Pairs === -->
-      <tr><td colspan="2" class="group-header">USD Pairs</td></tr>
-      <tr><td><strong>USD / AED</strong></td><td><a href="fx-dashboard/static/USDAED.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDAED_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>USD / CHF</strong></td><td><a href="fx-dashboard/static/USDCHF.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDCHF_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>USD / HKD</strong></td><td><a href="fx-dashboard/static/USDHKD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDHKD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>USD / PLN</strong></td><td><a href="fx-dashboard/static/USDPLN.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDPLN_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
-      <tr><td><strong>USD / SGD</strong></td><td><a href="fx-dashboard/static/USDSGD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/USDSGD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <!-- EUR rows -->
+      <tr class="data-row" data-group="EUR" data-search="eur aed euro united arab emirates ae">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇦🇪</span>
+            EUR / AED
+          </div>
+          <div class="pair-code">EURAED</div>
+          <div class="insight">Focus on EUR vs Gulf pegged dynamics.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURAED.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURAED_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
 
-      <!-- === AUD Pairs === -->
-      <tr><td colspan="2" class="group-header">AUD Pairs</td></tr>
-      <tr><td><strong>AUD / USD</strong></td><td><a href="fx-dashboard/static/AUDUSD.html" class="btn">View Dashboard</a><a href="fx-dashboard/output/AUDUSD_Analysis.html" class="btn btn-analysis">Analysis</a></td></tr>
+      <tr class="data-row" data-group="EUR" data-search="eur cad euro canada cad">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇨🇦</span>
+            EUR / CAD
+          </div>
+          <div class="pair-code">EURCAD</div>
+          <div class="insight">Watch ECB vs BoC policy divergence.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURCAD.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURCAD_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur chf euro swiss franc switzerland">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇨🇭</span>
+            EUR / CHF
+          </div>
+          <div class="pair-code">EURCHF</div>
+          <div class="insight">Sensitive to risk sentiment and SNB moves.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURCHF.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURCHF_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur cny euro china cn asia">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇨🇳</span>
+            EUR / CNY
+          </div>
+          <div class="pair-code">EURCNY</div>
+          <div class="insight">Tracks PBoC policy and Chinese macro momentum.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURCNY.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURCNY_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur czk euro czech koruna">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇨🇿</span>
+            EUR / CZK
+          </div>
+          <div class="pair-code">EURCZK</div>
+          <div class="insight">Regional Central Europe risk and CNB stance.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURCZK.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURCZK_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur dkk euro denmark">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇩🇰</span>
+            EUR / DKK
+          </div>
+          <div class="pair-code">EURDKK</div>
+          <div class="insight">Narrow range; Danish peg management in focus.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURDKK.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURDKK_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur gbp euro sterling uk britain">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇬🇧</span>
+            EUR / GBP
+          </div>
+          <div class="pair-code">EURGBP</div>
+          <div class="insight">ECB vs BoE expectations drive medium-term bias.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURGBP.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURGBP_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur hkd euro hong kong">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇭🇰</span>
+            EUR / HKD
+          </div>
+          <div class="pair-code">EURHKD</div>
+          <div class="insight">Linked to USD/HKD board and EURUSD trends.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURHKD.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURHKD_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur jpy euro japan yen asia">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇯🇵</span>
+            EUR / JPY
+          </div>
+          <div class="pair-code">EURJPY</div>
+          <div class="insight">Carry and BOJ policy shifts are key drivers.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURJPY.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURJPY_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur nok euro norway oil scandi">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇳🇴</span>
+            EUR / NOK
+          </div>
+          <div class="pair-code">EURNOK</div>
+          <div class="insight">Oil prices and Norges Bank guidance in focus.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURNOK.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURNOK_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur pln euro poland central europe">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇵🇱</span>
+            EUR / PLN
+          </div>
+          <div class="pair-code">EURPLN</div>
+          <div class="insight">Polish inflation and NBP stance are key inputs.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURPLN.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURPLN_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur rub euro russia ruble">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇷🇺</span>
+            EUR / RUB
+          </div>
+          <div class="pair-code">EURRUB</div>
+          <div class="insight">Geopolitics and sanctions heavily influence pricing.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURRUB.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURRUB_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur sek euro sweden scandi">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇸🇪</span>
+            EUR / SEK
+          </div>
+          <div class="pair-code">EURSEK</div>
+          <div class="insight">Riksbank policy and regional risk appetite.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURSEK.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURSEK_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur usd euro dollar united states us major">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇺🇸</span>
+            EUR / USD
+          </div>
+          <div class="pair-code">EURUSD</div>
+          <div class="insight">Core major; tracks global risk and rate differentials.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURUSD.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURUSD_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="EUR" data-search="eur zar euro south africa emerging">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇪🇺 / 🇿🇦</span>
+            EUR / ZAR
+          </div>
+          <div class="pair-code">EURZAR</div>
+          <div class="insight">High-beta EM play; sensitive to risk and commodities.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/EURZAR.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/EURZAR_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <!-- ===== GBP GROUP ===== -->
+      <tr class="group-header-row">
+        <td colspan="2">
+          <div class="group-header" data-group-toggle="GBP">
+            <span class="label">
+              <span class="flags">🇬🇧</span>
+              GBP Pairs
+            </span>
+            <span class="group-toggle" id="toggleGBP">−</span>
+          </div>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="GBP" data-search="gbp aed pound uk united arab emirates ae">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇬🇧 / 🇦🇪</span>
+            GBP / AED
+          </div>
+          <div class="pair-code">GBPAED</div>
+          <div class="insight">BoE policy vs USD-pegged AED framework.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/GBPAED.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/GBPAED_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="GBP" data-search="gbp jpy pound japan yen asia">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇬🇧 / 🇯🇵</span>
+            GBP / JPY
+          </div>
+          <div class="pair-code">GBPJPY</div>
+          <div class="insight">Classic risk and carry barometer in FX crosses.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/GBPJPY.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/GBPJPY_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="GBP" data-search="gbp usd pound dollar major">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇬🇧 / 🇺🇸</span>
+            GBP / USD
+          </div>
+          <div class="pair-code">GBPUSD</div>
+          <div class="insight">Driven by BoE vs Fed pricing and risk appetite.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/GBPUSD.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/GBPUSD_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <!-- ===== USD GROUP ===== -->
+      <tr class="group-header-row">
+        <td colspan="2">
+          <div class="group-header" data-group-toggle="USD">
+            <span class="label">
+              <span class="flags">🇺🇸</span>
+              USD Pairs
+            </span>
+            <span class="group-toggle" id="toggleUSD">−</span>
+          </div>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="USD" data-search="usd aed dollar united arab emirates ae">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇺🇸 / 🇦🇪</span>
+            USD / AED
+          </div>
+          <div class="pair-code">USDAED</div>
+          <div class="insight">Pegged regime; useful for regional USD flows.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/USDAED.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/USDAED_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="USD" data-search="usd cad dollar canada cad">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇺🇸 / 🇨🇦</span>
+            USD / CAD
+          </div>
+          <div class="pair-code">USDCAD</div>
+          <div class="insight">Oil and Fed vs BoC expectations dominate moves.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/USDCAD.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/USDCAD_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="USD" data-search="usd chf dollar swiss franc">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇺🇸 / 🇨🇭</span>
+            USD / CHF
+          </div>
+          <div class="pair-code">USDCHF</div>
+          <div class="insight">Safe-haven flows and Fed/SNB spread sensitive.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/USDCHF.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/USDCHF_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="USD" data-search="usd hkd dollar hong kong">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇺🇸 / 🇭🇰</span>
+            USD / HKD
+          </div>
+          <div class="pair-code">USDHKD</div>
+          <div class="insight">Linked exchange rate band dynamics in focus.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/USDHKD.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/USDHKD_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="USD" data-search="usd jpy dollar yen japan asia">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇺🇸 / 🇯🇵</span>
+            USD / JPY
+          </div>
+          <div class="pair-code">USDJPY</div>
+          <div class="insight">Core rate-differential and carry trade barometer.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/USDJPY.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/USDJPY_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="USD" data-search="usd pln dollar poland central europe">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇺🇸 / 🇵🇱</span>
+            USD / PLN
+          </div>
+          <div class="pair-code">USDPLN</div>
+          <div class="insight">Emerging Europe USD exposure & NBP policy mix.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/USDPLN.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/USDPLN_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <tr class="data-row" data-group="USD" data-search="usd sgd dollar singapore asia">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇺🇸 / 🇸🇬</span>
+            USD / SGD
+          </div>
+          <div class="pair-code">USDSGD</div>
+          <div class="insight">MAS band policy and regional risk sentiment.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/USDSGD.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/USDSGD_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
+      <!-- AUDUSD kept in USD section as requested -->
+      <tr class="data-row" data-group="USD" data-search="aud usd australia dollar commodity">
+        <td>
+          <div class="pair-name">
+            <span class="flags">🇦🇺 / 🇺🇸</span>
+            AUD / USD
+          </div>
+          <div class="pair-code">AUDUSD</div>
+          <div class="insight">Risk-on proxy; China data & commodities matter.</div>
+        </td>
+        <td class="actions">
+          <a href="fx-dashboard/static/AUDUSD.html" class="btn">Dashboard</a>
+          <a href="fx-dashboard/output/AUDUSD_Analysis.html" class="btn btn-analysis">Analysis</a>
+        </td>
+      </tr>
+
     </tbody>
   </table>
 
   <footer>
-    © 2025 FX Dashboard | Select a pair to view details
+    © 2025 FX Dashboard | Use the main menu to jump between dashboards and weekly analysis
   </footer>
 
+  <script>
+    // === Collapsible groups ===
+    document.querySelectorAll('[data-group-toggle]').forEach(header => {
+      header.addEventListener('click', () => {
+        const group = header.getAttribute('data-group-toggle');
+        const rows = document.querySelectorAll('.data-row[data-group="' + group + '"]');
+        const toggleIcon = document.getElementById('toggle' + group);
+
+        let anyVisible = false;
+        rows.forEach(row => {
+          if (row.style.display !== 'none') anyVisible = true;
+        });
+
+        const newDisplay = anyVisible ? 'none' : '';
+        rows.forEach(row => {
+          row.style.display = newDisplay;
+        });
+
+        if (toggleIcon) {
+          toggleIcon.textContent = anyVisible ? '+' : '−';
+        }
+      });
+    });
+
+    // === Search/filter ===
+    const searchInput = document.getElementById('pairSearch');
+    searchInput.addEventListener('input', () => {
+      const term = searchInput.value.toLowerCase().trim();
+      const rows = document.querySelectorAll('.data-row');
+
+      rows.forEach(row => {
+        const searchText =
+          (row.getAttribute('data-search') || '') +
+          ' ' +
+          row.textContent.toLowerCase();
+
+        if (!term || searchText.includes(term)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  </script>
 </body>
 </html>
