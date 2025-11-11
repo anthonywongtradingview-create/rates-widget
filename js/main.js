@@ -308,44 +308,41 @@ async function main() {
         parseFloat(document.getElementById("customVolume").value) || 0;
       const selectedVolume = parseFloat(volumeSelect.value) || 0;
       const volume = useCustom ? customVolume : selectedVolume;
-
+    
       const adjusted = marketRate * (1 - margin);
       const inverse = (1 / marketRate) * (1 - margin);
-      document.getElementById("offerRate").textContent =
-        adjusted.toFixed(6);
-      document.getElementById("inverseRate").textContent =
-        inverse.toFixed(6);
-
+      document.getElementById("offerRate").textContent = adjusted.toFixed(6);
+      document.getElementById("inverseRate").textContent = inverse.toFixed(6);
+    
       const baseSymbol = sym(BASE);
       const quoteSymbol = sym(QUOTE);
-
+    
       if (volume > 0) {
         document.getElementById("exchangeEUR").textContent =
           `${baseSymbol}${volume.toLocaleString()}`;
         document.getElementById("exchangeUSD").textContent =
           `${quoteSymbol}${volume.toLocaleString()}`;
-
+    
         const offerAmount = adjusted * volume;
         const inverseAmount = inverse * volume;
         document.getElementById("offerAmount").textContent =
           `${quoteSymbol}${offerAmount.toLocaleString()}`;
         document.getElementById("inverseAmount").textContent =
           `${baseSymbol}${inverseAmount.toLocaleString()}`;
-
+    
         const effectiveMargin = margin - 0.00055;
         if (effectiveMargin > 0) {
           const revenueEURUSD = volume * effectiveMargin;
           const revenueUSDEUR = inverseAmount * effectiveMargin;
+    
+          // 💡 Use base currency for profit symbol
+          const profitCurrency = BASE.toUpperCase();
+          const profitSymbol = sym(profitCurrency);
+    
           document.getElementById("revenueEURUSD").textContent =
-            revenueEURUSD.toLocaleString(undefined, {
-              style: "currency",
-              currency: "EUR",
-            });
+            `${profitSymbol}${revenueEURUSD.toFixed(2)}`;
           document.getElementById("revenueUSDEUR").textContent =
-            revenueUSDEUR.toLocaleString(undefined, {
-              style: "currency",
-              currency: "EUR",
-            });
+            `${profitSymbol}${revenueUSDEUR.toFixed(2)}`;
         } else {
           document.getElementById("revenueEURUSD").textContent = "–";
           document.getElementById("revenueUSDEUR").textContent = "–";
@@ -359,7 +356,7 @@ async function main() {
         document.getElementById("revenueUSDEUR").textContent = "–";
       }
     }
-
+    
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
     document.getElementById("customVolume").addEventListener("input", recalc);
@@ -367,10 +364,6 @@ async function main() {
       .getElementById("useCustomVolume")
       .addEventListener("change", recalc);
     recalc();
-  } catch (e) {
-    document.body.innerHTML = `<p style="color:red">${e.message}</p>`;
-    console.error(e);
-  }
-}
+
 
 main();
