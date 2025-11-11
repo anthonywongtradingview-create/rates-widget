@@ -13,20 +13,20 @@
       margin: 0;
       padding: 20px;
     }
-
+  
     h1 {
       font-size: 26px;
       text-align: center;
       margin-bottom: 10px;
     }
-
+  
     .subheading {
       text-align: center;
       font-size: 14px;
       color: #9ca3af;
       margin-bottom: 20px;
     }
-
+  
     .search-container {
       max-width: 950px;
       margin: 0 auto 18px auto;
@@ -36,12 +36,12 @@
       justify-content: space-between;
       flex-wrap: wrap;
     }
-
+  
     .search-container label {
       font-size: 14px;
       color: #9ca3af;
     }
-
+  
     #pairSearch {
       flex: 1;
       min-width: 180px;
@@ -52,9 +52,11 @@
       color: #e5e7eb;
       font-size: 14px;
     }
-
+  
+    /* === Table Styling === */
     table {
       border-collapse: collapse;
+      table-layout: auto !important;
       width: 100%;
       max-width: 950px;
       margin: 0 auto;
@@ -62,31 +64,39 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.4);
       border-radius: 10px;
       overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1); /* consistent outer border */
     }
-
+  
     th, td {
       padding: 12px 14px;
-      border-bottom: 1px solid #1f2937;
       font-size: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08); /* consistent thin dividers */
+      text-align: left;
+      vertical-align: middle;
     }
-
+  
     th {
       background: #111827;
       color: #e5e7eb;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
-
-    td.actions {
-      text-align: right;
-      white-space: nowrap;
+  
+    /* Consistent row dividers */
+    tbody tr:not(:last-child) td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     }
-
+  
+    tr:last-child td {
+      border-bottom: none;
+    }
+  
     tr.data-row:hover td {
-      background-color: #020617;
+      background-color: #0b1220;
     }
-
+  
+    /* === Button Styles === */
     .btn {
       display: inline-block;
       padding: 7px 12px;
@@ -98,32 +108,48 @@
       text-decoration: none;
       cursor: pointer;
       transition: background 0.15s, transform 0.05s;
-      margin-left: 6px;
     }
-
-    .btn:first-child {
-      margin-left: 0;
-    }
-
+  
     .btn:hover {
       background: #1d4ed8;
       transform: translateY(-1px);
     }
-
+  
     .btn-analysis {
       background: #22c55e;
     }
-
+  
     .btn-analysis:hover {
       background: #16a34a;
     }
-
+  
+    /* === Fix Dashboard & Analysis column alignment === */
+    th:nth-child(2),
+    td.actions {
+      text-align: center;
+      vertical-align: middle;
+      width: 250px;
+    }
+  
+    td.actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+  
+    tr.data-row {
+      height: 68px;
+    }
+  
+    /* === Group Headers === */
     .group-header-row td {
       padding: 10px 14px;
       background: #0b1120;
-      border-bottom: 1px solid #1f2937;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-
+  
     .group-header {
       display: flex;
       align-items: center;
@@ -132,85 +158,65 @@
       font-weight: 600;
       font-size: 15px;
     }
-
+  
     .group-header span.label {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
+  
     .group-toggle {
       font-size: 18px;
       opacity: 0.7;
     }
-
+  
+    /* === Currency Info Text === */
     .pair-name {
       font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
+  
     .flags {
       font-size: 18px;
     }
-
+  
     .pair-code {
       font-size: 13px;
       color: #9ca3af;
     }
-
+  
     .insight {
       margin-top: 4px;
       font-size: 12px;
       color: #9ca3af;
     }
-
+  
+    /* === Footer === */
     footer {
       text-align: center;
       font-size: 13px;
       color: #6b7280;
       margin-top: 30px;
     }
-
+  
+    /* === Responsive === */
     @media (max-width: 720px) {
       th:nth-child(2),
       td.actions {
         text-align: left;
+        width: auto;
       }
-
-      .btn {
-        margin-top: 4px;
+  
+      td.actions {
+        flex-direction: column;
+        gap: 6px;
       }
-
+  
       table {
         font-size: 13px;
       }
-    }
-    /* === Fix Dashboard & Analysis button alignment === */
-    th:nth-child(2),
-    td.actions {
-      text-align: center;
-      vertical-align: middle;
-      width: 250px; /* give column enough room for buttons */
-    }
-    
-    td.actions {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-    }
-    
-    /* ensure table respects content width */
-    table {
-      table-layout: auto !important;
-    }
-    
-    /* consistent row height */
-    tr.data-row {
-      height: 68px;
     }
   </style>
 </head>
