@@ -1,8 +1,38 @@
+/* ==========================================================
+   🌈 GLOBAL THEME COLORS
+   ----------------------------------------------------------
+   💡 Tweak these main variables to recolor your dashboard site
+   ========================================================== */
+:root {
+  /* Base UI colors */
+  --bg-light: #ffffff;
+  --bg-panel: #f8f8f8;
+  --bg-table-header: #f0f0f0;
+  --text-main: #111111;
+  --text-muted: #555555;
+
+  /* Accent colors */
+  --accent-green: #4caf50;
+  --accent-orange: #ffb74d;
+  --accent-yellow: #f7e69e;
+  --accent-blue: #0a58ca;
+
+  /* Button colors */
+  --btn-blue: #0a58ca;
+  --btn-green: #43a047;
+  --btn-hover-blue: #084298;
+  --btn-hover-green: #2e7d32;
+
+  /* Borders and shadows */
+  --border-light: #ddd;
+  --shadow-soft: rgba(0, 0, 0, 0.05);
+}
+
 /* === Base === */
 body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: #fff;
-  color: #111;
+  background: var(--bg-light);
+  color: var(--text-main);
   margin: 0;
   padding: 20px;
 }
@@ -10,16 +40,17 @@ body {
 /* === Header + Nav === */
 .site-header {
   margin-bottom: 16px;
+  text-align: center;
 }
 .site-header h1 {
-  font-size: 20px;
+  font-size: 22px;
   margin: 0 0 8px;
 }
 .site-nav a {
   display: inline-block;
   margin-right: 12px;
   text-decoration: none;
-  color: #0a58ca;
+  color: var(--accent-blue);
 }
 .site-nav a:hover {
   text-decoration: underline;
@@ -27,7 +58,7 @@ body {
 
 /* === Control Panel (Centered Layout) === */
 .panel {
-  background: #f8f8f8;
+  background: var(--bg-panel);
   padding: 15px 25px;
   border-radius: 8px;
   margin: 0 auto 30px auto;
@@ -37,7 +68,7 @@ body {
   align-items: center;
   flex-wrap: wrap;
   gap: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px var(--shadow-soft);
 }
 
 .panel label {
@@ -51,7 +82,7 @@ body {
 .panel select,
 .panel input[type="number"] {
   padding: 6px 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-light);
   border-radius: 4px;
   font-size: 14px;
   outline: none;
@@ -59,7 +90,7 @@ body {
 
 .panel select:focus,
 .panel input[type="number"]:focus {
-  border-color: #4caf50;
+  border-color: var(--accent-green);
   box-shadow: 0 0 3px rgba(76,175,80,0.3);
 }
 
@@ -79,9 +110,10 @@ table {
 
 th,
 td {
-  border: 1px solid #ddd;
-  padding: 8px 10px;
-  text-align: right;
+  border: 1px solid var(--border-light);
+  padding: 10px 12px;
+  text-align: center;       /* Centered content */
+  vertical-align: middle;   /* Vertically centered */
   white-space: nowrap;
 }
 
@@ -100,14 +132,14 @@ td:nth-child(4) {
 }
 
 th {
-  background: #f0f0f0;
+  background: var(--bg-table-header);
   font-weight: 600;
 }
 
 .info {
   font-size: 14px;
   margin-top: 8px;
-  color: #555;
+  color: var(--text-muted);
 }
 
 /* === Table Styles (Google Sheets aesthetic) === */
@@ -139,7 +171,7 @@ th {
   font-size: 15px;
 }
 
-/* Offer Table */
+/* === Offer Table === */
 .offer-table thead th {
   background-color: #9acb7e;
 }
@@ -151,9 +183,9 @@ th {
   background-color: #f5fff5;
 }
 
-/* Revenue Table */
+/* === Revenue Table === */
 .revenue-table thead th {
-  background-color: #f7e69e;
+  background-color: var(--accent-yellow);
 }
 .revenue-table tbody td:first-child {
   background-color: #fff9d6;
@@ -183,7 +215,7 @@ th {
 #combinedHolidays th,
 #combinedHolidays td {
   padding: 12px 14px;
-  text-align: left;
+  text-align: center;
   font-size: 14px;
   border-bottom: 1px solid #e6e6e6;
 }
@@ -221,7 +253,7 @@ h2::before {
   transform: translateX(-50%);
   width: 500px;
   height: 8px;
-  background: linear-gradient(90deg, #4caf50, #ffb74d);
+  background: linear-gradient(90deg, var(--accent-green), var(--accent-orange));
   border-radius: 2px;
 }
 
@@ -317,7 +349,7 @@ h2::before {
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
-/* === FIX: Ensure Insights column visible === */
+/* === Ensure Insights column visible === */
 #upcomingEvents th:last-child,
 #upcomingEvents td:last-child {
   display: table-cell !important;
@@ -334,7 +366,7 @@ h2::before {
   padding: 6px 12px;
   font-size: 13px;
   color: #fff;
-  background: linear-gradient(90deg, #4caf50, #43a047);
+  background: linear-gradient(90deg, var(--accent-green), var(--btn-green));
   border: none;
   border-radius: 6px;
   text-decoration: none;
