@@ -190,21 +190,27 @@
     /* === Fix Dashboard & Analysis button alignment === */
     th:nth-child(2),
     td.actions {
-      text-align: center !important;    /* center horizontally */
-      vertical-align: middle !important; /* center vertically */
+      text-align: center;
+      vertical-align: middle;
+      width: 250px; /* give column enough room for buttons */
     }
     
-    /* Make the buttons sit evenly side-by-side */
     td.actions {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      width: 100%;
     }
     
-    /* Adjust row height for consistent spacing */
+    /* ensure table respects content width */
+    table {
+      table-layout: auto !important;
+    }
+    
+    /* consistent row height */
     tr.data-row {
-      height: 64px;
+      height: 68px;
     }
   </style>
 </head>
