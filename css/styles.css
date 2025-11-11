@@ -112,16 +112,19 @@ th,
 td {
   border: 1px solid var(--border-light);
   padding: 10px 12px;
-  text-align: center;       /* Centered content */
-  vertical-align: middle;   /* Vertically centered */
+  text-align: center;
+  vertical-align: middle; /* ✅ vertical centering */
   white-space: nowrap;
 }
 
+/* === Ensure first column aligns left === */
 th:first-child,
 td:first-child {
   text-align: left;
   width: 28%;
 }
+
+/* === Column widths === */
 th:nth-child(2),
 td:nth-child(2),
 th:nth-child(3),
@@ -134,6 +137,23 @@ td:nth-child(4) {
 th {
   background: var(--bg-table-header);
   font-weight: 600;
+  text-align: center; /* ✅ center the header horizontally */
+  vertical-align: middle; /* ✅ center vertically */
+}
+
+/* === Center Buttons in Cell === */
+td.actions {
+  text-align: center;
+  vertical-align: middle;
+  display: flex; /* ✅ ensures both buttons stay centered */
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Optional: Adjust row height for consistency */
+tr {
+  height: 60px;
 }
 
 .info {
