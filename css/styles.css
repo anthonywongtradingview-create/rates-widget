@@ -1,7 +1,7 @@
 /* ==========================================================
    🌈 GLOBAL THEME COLORS
    ----------------------------------------------------------
-   💡 Tweak these main variables to recolor your dashboard site
+   💡 Adjust these variables to recolor your dashboard site
    ========================================================== */
 :root {
   /* Base UI colors */
@@ -113,18 +113,18 @@ td {
   border: 1px solid var(--border-light);
   padding: 10px 12px;
   text-align: center;
-  vertical-align: middle; /* ✅ vertical centering */
+  vertical-align: middle;
   white-space: nowrap;
 }
 
-/* === Ensure first column aligns left === */
+/* First column left-aligned */
 th:first-child,
 td:first-child {
   text-align: left;
   width: 28%;
 }
 
-/* === Column widths === */
+/* Column widths */
 th:nth-child(2),
 td:nth-child(2),
 th:nth-child(3),
@@ -134,28 +134,37 @@ td:nth-child(4) {
   width: 24%;
 }
 
+/* Header cells */
 th {
   background: var(--bg-table-header);
   font-weight: 600;
-  text-align: center; /* ✅ center the header horizontally */
-  vertical-align: middle; /* ✅ center vertically */
-}
-
-/* === Center Buttons in Cell === */
-td.actions {
   text-align: center;
   vertical-align: middle;
-  display: flex; /* ✅ ensures both buttons stay centered */
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
 }
 
-/* Optional: Adjust row height for consistency */
+/* === Center Dashboard / Analysis Buttons === */
+td.actions {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Buttons inside the actions cell */
+td.actions .btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 6px;
+  vertical-align: middle;
+}
+
+/* Consistent row height */
 tr {
   height: 60px;
 }
 
+/* === General Text & Info === */
 .info {
   font-size: 14px;
   margin-top: 8px;
@@ -215,7 +224,7 @@ tr {
   background-color: #fffef0;
 }
 
-/* === Modern Table Style for Next 5 Settlement Holidays === */
+/* === Settlement Holidays Table === */
 #combinedHolidays {
   max-width: 700px;
   margin: 30px auto;
@@ -277,7 +286,7 @@ h2::before {
   border-radius: 2px;
 }
 
-/* === Modernized Upcoming Economic Events Table === */
+/* === Upcoming Economic Events Table === */
 #upcomingEvents {
   max-width: 1000px;
   margin: 40px auto;
@@ -296,7 +305,6 @@ h2::before {
   transition: all 0.2s ease-in-out;
 }
 
-/* Header styling */
 #upcomingEvents th {
   background: linear-gradient(to right, #f3f3f3, #ececec);
   color: #222;
@@ -319,7 +327,6 @@ h2::before {
   vertical-align: middle;
 }
 
-/* Column widths */
 #upcomingEvents th:nth-child(2),
 #upcomingEvents td:nth-child(2) {
   width: 6%;
@@ -329,7 +336,6 @@ h2::before {
   width: 40%;
 }
 
-/* Alternate row shading & hover */
 #upcomingEvents tr:nth-child(even) td {
   background-color: #fafafa;
 }
@@ -369,7 +375,7 @@ h2::before {
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
-/* === Ensure Insights column visible === */
+/* === Insights column visibility === */
 #upcomingEvents th:last-child,
 #upcomingEvents td:last-child {
   display: table-cell !important;
