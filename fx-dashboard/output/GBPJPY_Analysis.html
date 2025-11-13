@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GBP/JPY – Weekly Analysis</title>
 
-  <!-- ✅ Link shared site CSS (go up 2 levels) -->
   <link rel="stylesheet" href="../../css/styles.css" />
 
   <style>
@@ -19,27 +18,37 @@
 
     header {
       background: #161b22;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 20px 20px 28px;
       border-bottom: 1px solid #30363d;
+      text-align: center;
     }
 
     header h1 {
-      font-size: 20px;
-      margin: 0;
+      font-size: 24px;
+      margin: 0 0 14px;
       color: #58a6ff;
     }
 
-    header a {
-      color: #8b949e;
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s ease;
+    .header-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 5px;
     }
 
-    header a:hover {
+    .header-btns a {
+      padding: 8px 14px;
+      font-size: 14px;
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .header-btns a:hover {
+      background: #30363d;
       color: #58a6ff;
     }
 
@@ -76,32 +85,56 @@
 </head>
 
 <body>
+
   <header>
     <h1>GBP/JPY – Weekly Analysis</h1>
-    <!-- ✅ Back to main menu at site root -->
-    <a href="../../index.html">← Back to Main Menu</a>
+
+    <div class="header-btns">
+      <a href="../../index.html">Back to Main Menu</a>
+      <a href="../static/GBPJPY.html">Return to Dashboard</a>
+    </div>
   </header>
 
   <main>
     <div class="chart-container">
-      <!-- ✅ Chart file for this pair -->
       <iframe src="GBPJPY_last_week.html" title="GBPJPY Weekly Chart"></iframe>
     </div>
 
     <div class="summary">
       <h2 style="font-size:16px; color:#58a6ff;">Summary</h2>
+
       <p>
-        This chart presents GBP/JPY hourly candlestick data for the past week,
-        highlighting the pair’s volatility patterns, major support/resistance levels,
-        and reactions to key UK and Japanese economic events sourced from your Google Sheets feed.
+        GBP/JPY is one of the market’s most actively traded and volatile crosses, reflecting the contrast between the 
+        British pound’s developed-market dynamics and the Japanese yen’s long-standing role as a global safe-haven and 
+        funding currency. The pair often moves in response to shifts in global risk sentiment, interest-rate 
+        differentials, and the relative economic outlooks of the UK and Japan.
       </p>
+
       <p>
-        Hover over any event marker for details such as forecast, actual, and previous data values.
+        Sterling tends to be influenced by structural factors such as the trajectory of UK monetary policy, capital flows 
+        into the financial sector, and broader confidence in the UK’s economic and regulatory environment. As a 
+        higher-beta developed-market currency, GBP often strengthens during periods of improving global growth prospects 
+        and stable financial conditions.
       </p>
+
+      <p>
+        The Japanese yen, by contrast, is shaped by Japan’s historically low interest-rate environment and its status as 
+        a preferred currency during periods of risk aversion. JPY typically appreciates when investors unwind 
+        carry-trade positions or seek defensive assets, and depreciates when global financial conditions are supportive 
+        of risk-taking.
+      </p>
+
+      <p>
+        These differing characteristics give GBP/JPY a distinctly cyclical profile. The pair tends to trend strongly 
+        when interest-rate expectations diverge meaningfully or when global risk appetite shifts, making it a popular 
+        vehicle for expressing macro views. As such, GBP/JPY often serves as a barometer of global sentiment, capturing 
+        the balance between risk-seeking behaviour and the demand for traditional safe-haven currencies.
+      </p>
+
     </div>
   </main>
 
-  <!-- ✅ Shared JavaScript (go up 2 levels) -->
   <script src="../../js/main.js"></script>
+
 </body>
 </html>
