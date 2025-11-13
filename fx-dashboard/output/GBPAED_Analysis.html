@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GBP/AED – Weekly Analysis</title>
 
-  <!-- ✅ Link shared site CSS (go up 2 levels) -->
   <link rel="stylesheet" href="../../css/styles.css" />
 
   <style>
@@ -19,27 +18,37 @@
 
     header {
       background: #161b22;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 20px 20px 28px;
       border-bottom: 1px solid #30363d;
+      text-align: center;
     }
 
     header h1 {
-      font-size: 20px;
-      margin: 0;
+      font-size: 24px;
+      margin: 0 0 14px;
       color: #58a6ff;
     }
 
-    header a {
-      color: #8b949e;
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s ease;
+    .header-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 5px;
     }
 
-    header a:hover {
+    .header-btns a {
+      padding: 8px 14px;
+      font-size: 14px;
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .header-btns a:hover {
+      background: #30363d;
       color: #58a6ff;
     }
 
@@ -76,32 +85,56 @@
 </head>
 
 <body>
+
   <header>
     <h1>GBP/AED – Weekly Analysis</h1>
-    <!-- ✅ Back to main menu at site root -->
-    <a href="../../index.html">← Back to Main Menu</a>
+
+    <div class="header-btns">
+      <a href="../../index.html">Back to Main Menu</a>
+      <a href="../static/GBPAED.html">Return to Dashboard</a>
+    </div>
   </header>
 
   <main>
     <div class="chart-container">
-      <!-- ✅ Chart file for this pair -->
       <iframe src="GBPAED_last_week.html" title="GBPAED Weekly Chart"></iframe>
     </div>
 
     <div class="summary">
       <h2 style="font-size:16px; color:#58a6ff;">Summary</h2>
+
       <p>
-        This interactive chart visualizes GBP/AED hourly candlestick movements for the past week,
-        displaying major price swings, key resistance and support levels, and annotated economic events
-        automatically sourced from your Google Sheets feed.
+        GBP/AED is a structurally stable currency pair due to the United Arab Emirates’ long-standing peg between the 
+        dirham and the U.S. dollar. As a result, movements in the pair primarily reflect changes in the British pound 
+        relative to the U.S. dollar, with the AED effectively tracking USD behaviour through its currency-board system.
       </p>
+
       <p>
-        Hover over any event marker to view key details including forecast, actual, and previous values.
+        The British pound is influenced by long-term structural drivers including the outlook for UK monetary policy, 
+        capital flows into the country’s large financial sector, and overall confidence in the UK’s economic trajectory. 
+        Sterling often responds to shifts in domestic rate expectations, investor appetite for UK assets, and broader 
+        sentiment toward developed-market currencies.
       </p>
+
+      <p>
+        The UAE dirham, on the other hand, derives its stability from the country’s strong external balances, substantial 
+        hydrocarbon revenues, and the central bank’s commitment to maintaining the fixed exchange rate. Because AED is 
+        pegged to USD, its movements largely mirror shifts in the global demand for U.S. dollars rather than domestic 
+        economic conditions.
+      </p>
+
+      <p>
+        These dynamics mean GBP/AED mostly captures the relative performance of the UK economy against the global 
+        backdrop in which the U.S. dollar operates. The pair may strengthen when sterling appreciates against USD or 
+        global risk sentiment favours higher-yielding developed-market assets. Conversely, periods of broad USD strength 
+        or defensive capital flows tend to translate into a firmer AED relative to GBP. As such, GBP/AED remains a 
+        transparent indicator of the balance between UK-specific macro trends and U.S.-driven dollar liquidity conditions.
+      </p>
+
     </div>
   </main>
 
-  <!-- ✅ Shared JavaScript (go up 2 levels) -->
   <script src="../../js/main.js"></script>
+
 </body>
 </html>
