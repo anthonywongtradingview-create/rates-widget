@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>USD/PLN – Weekly Analysis</title>
 
-  <!-- ✅ Link shared site CSS (go up 2 levels) -->
   <link rel="stylesheet" href="../../css/styles.css" />
 
   <style>
@@ -19,27 +18,37 @@
 
     header {
       background: #161b22;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 20px 20px 28px;
       border-bottom: 1px solid #30363d;
+      text-align: center;
     }
 
     header h1 {
-      font-size: 20px;
-      margin: 0;
+      font-size: 24px;
+      margin: 0 0 14px;
       color: #58a6ff;
     }
 
-    header a {
-      color: #8b949e;
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s ease;
+    .header-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 5px;
     }
 
-    header a:hover {
+    .header-btns a {
+      padding: 8px 14px;
+      font-size: 14px;
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .header-btns a:hover {
+      background: #30363d;
       color: #58a6ff;
     }
 
@@ -76,31 +85,57 @@
 </head>
 
 <body>
+
   <header>
     <h1>USD/PLN – Weekly Analysis</h1>
-    <!-- ✅ Back to main menu at site root -->
-    <a href="../../index.html">← Back to Main Menu</a>
+
+    <div class="header-btns">
+      <a href="../../index.html">Back to Main Menu</a>
+      <a href="../static/USDPLN.html">Return to Dashboard</a>
+    </div>
   </header>
 
   <main>
     <div class="chart-container">
-      <!-- ✅ Chart file for this pair -->
       <iframe src="USDPLN_last_week.html" title="USDPLN Weekly Chart"></iframe>
     </div>
 
     <div class="summary">
       <h2 style="font-size:16px; color:#58a6ff;">Summary</h2>
+
       <p>
-        This interactive chart displays USD/PLN hourly candlestick data over the past week,
-        illustrating key movements and annotated macroeconomic events sourced directly from your Google Sheets event feed.
+        USD/PLN is a widely watched emerging-European currency pair that reflects the interaction between the U.S. 
+        dollar’s global reserve-currency status and Poland’s dynamic, developing-market economy. The cross often responds 
+        to global interest-rate cycles, shifts in investor appetite for emerging markets, and relative economic 
+        performance between the United States and Central Europe.
       </p>
+
       <p>
-        Hover over event markers to see detailed economic release data such as forecast, actual, and previous values.
+        The U.S. dollar is heavily influenced by long-term expectations for Federal Reserve policy, international demand 
+        for dollar liquidity, and broad movements in global risk sentiment. USD typically strengthens during periods of 
+        risk aversion or rising U.S. yields, and moderates when global financial conditions ease or capital flows favor 
+        higher-beta markets.
       </p>
+
+      <p>
+        The Polish zloty, by contrast, tends to behave as a cyclical currency tied to domestic financial conditions, 
+        the competitiveness of Poland’s export sector, and the broader outlook for emerging-European economies. PLN also 
+        reacts to market perceptions of political stability, structural reforms, and the health of domestic consumption 
+        and investment trends.
+      </p>
+
+      <p>
+        Taken together, USD/PLN often highlights the balance between safe-haven demand for the U.S. dollar and 
+        investors’ willingness to allocate capital toward emerging European assets. The pair can exhibit meaningful 
+        directional moves when global liquidity conditions shift or when monetary-policy expectations between the Federal 
+        Reserve and Poland’s central bank diverge. As such, USD/PLN serves as a key barometer of risk sentiment and 
+        regional economic positioning.
+      </p>
+
     </div>
   </main>
 
-  <!-- ✅ Shared JavaScript (go up 2 levels) -->
   <script src="../../js/main.js"></script>
+
 </body>
 </html>
