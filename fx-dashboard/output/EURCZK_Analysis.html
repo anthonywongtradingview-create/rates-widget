@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EUR/CZK – Weekly Analysis</title>
 
-  <!-- ✅ Link shared site CSS (go up 2 levels) -->
   <link rel="stylesheet" href="../../css/styles.css" />
 
   <style>
@@ -19,27 +18,37 @@
 
     header {
       background: #161b22;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 20px 20px 28px 20px;
       border-bottom: 1px solid #30363d;
+      text-align: center;
     }
 
     header h1 {
-      font-size: 20px;
-      margin: 0;
+      font-size: 24px;
+      margin: 0 0 14px 0;
       color: #58a6ff;
     }
 
-    header a {
-      color: #8b949e;
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s ease;
+    .header-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 5px;
     }
 
-    header a:hover {
+    .header-btns a {
+      padding: 8px 14px;
+      font-size: 14px;
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .header-btns a:hover {
+      background: #30363d;
       color: #58a6ff;
     }
 
@@ -76,32 +85,55 @@
 </head>
 
 <body>
+
   <header>
     <h1>EUR/CZK – Weekly Analysis</h1>
-    <!-- ✅ Back to main menu at site root -->
-    <a href="../../index.html">← Back to Main Menu</a>
+
+    <div class="header-btns">
+      <a href="../../index.html">Back to Main Menu</a>
+      <a href="../static/EURCZK.html">Return to Dashboard</a>
+    </div>
   </header>
 
   <main>
     <div class="chart-container">
-      <!-- ✅ Chart file for this pair -->
       <iframe src="EURCZK_last_week.html" title="EURCZK Weekly Chart"></iframe>
     </div>
 
     <div class="summary">
       <h2 style="font-size:16px; color:#58a6ff;">Summary</h2>
+
       <p>
-        This chart visualizes EUR/CZK hourly movements over the last week, showing exchange rate dynamics
-        driven by eurozone economic trends and Czech National Bank policy updates.
+        EUR/CZK is a currency pair shaped by the contrast between the Eurozone’s large, diversified economy and the 
+        Czech Republic’s smaller but highly open, export-oriented market. The cross often reflects broader regional 
+        dynamics, including capital flows into Central Europe, relative monetary policy stances, and shifts in investor 
+        appetite for emerging-market European assets.
       </p>
+
       <p>
-        Hover over any event marker to explore economic data details — including forecast, actual, and previous values
-        — automatically pulled from your Google Sheets event tracker.
+        The euro tends to be driven by Eurozone-wide trends such as inflation conditions, the ECB’s long-term policy 
+        outlook, and expectations around fiscal cohesion and cross-border demand. Its behaviour is heavily influenced by 
+        sentiment toward the region’s manufacturing base and the wider investment climate within Europe.
       </p>
+
+      <p>
+        The Czech koruna, meanwhile, is frequently viewed as one of the more stable Central European currencies, supported 
+        by conservative monetary management and a strong focus on inflation stability. CZK movements often respond to 
+        domestic rate expectations, trade performance, and the relative competitiveness of Czech industry within the 
+        European supply chain.
+      </p>
+
+      <p>
+        As a result, EUR/CZK tends to balance structural European themes with regional economic resilience. The pair 
+        often experiences steady, policy-led trends rather than abrupt volatility, with investors assessing whether the 
+        Czech economy is outperforming or underperforming the broader Eurozone backdrop. This makes the cross a useful 
+        gauge of Central European macro stability and relative value within the region.
+      </p>
+
     </div>
   </main>
 
-  <!-- ✅ Shared JavaScript (go up 2 levels) -->
   <script src="../../js/main.js"></script>
+
 </body>
 </html>
