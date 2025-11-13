@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>USD/CAD – Weekly Analysis</title>
 
-  <!-- ✅ Link shared site CSS (go up 2 levels) -->
   <link rel="stylesheet" href="../../css/styles.css" />
 
   <style>
@@ -19,27 +18,37 @@
 
     header {
       background: #161b22;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 20px 20px 28px;
       border-bottom: 1px solid #30363d;
+      text-align: center;
     }
 
     header h1 {
-      font-size: 20px;
-      margin: 0;
+      font-size: 24px;
+      margin: 0 0 14px;
       color: #58a6ff;
     }
 
-    header a {
-      color: #8b949e;
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s ease;
+    .header-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 5px;
     }
 
-    header a:hover {
+    .header-btns a {
+      padding: 8px 14px;
+      font-size: 14px;
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .header-btns a:hover {
+      background: #30363d;
       color: #58a6ff;
     }
 
@@ -76,32 +85,57 @@
 </head>
 
 <body>
+
   <header>
     <h1>USD/CAD – Weekly Analysis</h1>
-    <!-- ✅ Back to main menu at site root -->
-    <a href="../../index.html">← Back to Main Menu</a>
+
+    <div class="header-btns">
+      <a href="../../index.html">Back to Main Menu</a>
+      <a href="../static/USDCAD.html">Return to Dashboard</a>
+    </div>
   </header>
 
   <main>
     <div class="chart-container">
-      <!-- ✅ Chart file for this pair -->
       <iframe src="USDCAD_last_week.html" title="USDCAD Weekly Chart"></iframe>
     </div>
 
     <div class="summary">
       <h2 style="font-size:16px; color:#58a6ff;">Summary</h2>
+
       <p>
-        This interactive chart highlights USD/CAD hourly candlestick movements for the past week,
-        emphasizing market reactions to U.S. and Canadian economic data and oil price fluctuations.
+        USD/CAD is a widely traded North American currency pair that reflects the interplay between the U.S. dollar’s 
+        global reserve-currency status and the Canadian dollar’s role as a major commodity-linked currency. The cross 
+        often responds to long-term shifts in monetary-policy expectations, relative economic performance, and global 
+        appetite for risk-sensitive assets.
       </p>
+
       <p>
-        Hover over any event marker to view detailed data such as forecast, actual, and previous values
-        automatically synchronized from your Google Sheets economic calendar.
+        The U.S. dollar is influenced by structural forces such as the Federal Reserve’s long-term policy outlook, 
+        demand for dollar liquidity, and the currency’s dominant position in international trade and financial markets. 
+        USD movements often mirror changes in global macro sentiment, expectations around U.S. growth, and fluctuations 
+        in international capital flows.
       </p>
+
+      <p>
+        The Canadian dollar, by contrast, tends to be more sensitive to developments in the commodity complex, 
+        particularly energy markets, given Canada’s significant role as an oil exporter. CAD also reflects domestic 
+        financial conditions, interest-rate expectations, and the broader stability of Canada’s housing, consumption, 
+        and export sectors. As a result, the currency often behaves as a higher-beta proxy for global growth momentum.
+      </p>
+
+      <p>
+        These differing drivers create a pair that is particularly responsive to monetary-policy divergence and 
+        the direction of commodity cycles. USD/CAD may strengthen when U.S. yields rise or risk appetite softens, 
+        while improving global demand, higher energy prices, or strong Canadian economic performance can lend support 
+        to the Canadian dollar. Taken together, USD/CAD serves as a key barometer of relative strength across the 
+        North American economy and the broader global macro environment.
+      </p>
+
     </div>
   </main>
 
-  <!-- ✅ Shared JavaScript (go up 2 levels) -->
   <script src="../../js/main.js"></script>
+
 </body>
 </html>
