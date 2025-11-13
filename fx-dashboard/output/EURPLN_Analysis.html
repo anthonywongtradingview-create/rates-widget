@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EUR/PLN – Weekly Analysis</title>
 
-  <!-- ✅ Link shared site CSS (go up 2 levels) -->
   <link rel="stylesheet" href="../../css/styles.css" />
 
   <style>
@@ -19,27 +18,37 @@
 
     header {
       background: #161b22;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 20px 20px 28px;
       border-bottom: 1px solid #30363d;
+      text-align: center;
     }
 
     header h1 {
-      font-size: 20px;
-      margin: 0;
+      font-size: 24px;
+      margin: 0 0 14px;
       color: #58a6ff;
     }
 
-    header a {
-      color: #8b949e;
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s ease;
+    .header-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 5px;
     }
 
-    header a:hover {
+    .header-btns a {
+      padding: 8px 14px;
+      font-size: 14px;
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .header-btns a:hover {
+      background: #30363d;
       color: #58a6ff;
     }
 
@@ -76,31 +85,56 @@
 </head>
 
 <body>
+
   <header>
     <h1>EUR/PLN – Weekly Analysis</h1>
-    <!-- ✅ Back to main menu at site root -->
-    <a href="../../index.html">← Back to Main Menu</a>
+
+    <div class="header-btns">
+      <a href="../../index.html">Back to Main Menu</a>
+      <a href="../static/EURPLN.html">Return to Dashboard</a>
+    </div>
   </header>
 
   <main>
     <div class="chart-container">
-      <!-- ✅ Chart file for this pair -->
       <iframe src="EURPLN_last_week.html" title="EURPLN Weekly Chart"></iframe>
     </div>
 
     <div class="summary">
       <h2 style="font-size:16px; color:#58a6ff;">Summary</h2>
+
       <p>
-        This interactive chart displays EUR/PLN hourly candlestick movements over the past week,
-        highlighting price action and annotated economic events fetched from your Google Sheets event tracker.
+        EUR/PLN is a key Central European currency pair that highlights the economic relationship between the 
+        Eurozone and Poland’s fast-evolving, domestic-demand-driven economy. The cross often reflects structural 
+        differences in monetary policy, growth trajectories, and regional capital flows rather than short-term market noise.
       </p>
+
       <p>
-        Hover over event markers to see each event’s forecast, actual, and previous values for deeper market context.
+        The euro’s role in the pair is shaped by the broad fundamentals of the Eurozone, including long-term inflation 
+        dynamics, industrial performance, fiscal cohesion, and policy guidance from the European Central Bank. EUR tends 
+        to respond to macro themes involving regional competitiveness, sentiment toward European assets, and cross-border 
+        investment trends.
       </p>
+
+      <p>
+        The Polish zloty tends to behave as a more cyclical, emerging-European currency, influenced by domestic financial 
+        conditions, interest-rate expectations, and the outlook for Poland’s export-oriented manufacturing base. PLN can 
+        show sensitivity to changes in investor appetite for emerging markets, as well as shifts in global liquidity and 
+        risk sentiment.
+      </p>
+
+      <p>
+        Together, these characteristics mean EUR/PLN often captures the balance between Eurozone stability and 
+        Poland’s relatively higher-growth potential. The pair may strengthen when investors seek the safety and scale 
+        of major markets, and weaken when capital rotates toward higher-yielding Central European assets. As such, 
+        EUR/PLN serves as a useful indicator of macro divergence between Western Europe and the broader emerging-European 
+        region.
+      </p>
+
     </div>
   </main>
 
-  <!-- ✅ Shared JavaScript (go up 2 levels) -->
   <script src="../../js/main.js"></script>
+
 </body>
 </html>
