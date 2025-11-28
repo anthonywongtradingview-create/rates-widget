@@ -301,61 +301,71 @@ async function main() {
     renderEventsTable("upcomingEvents", events, 10);
 
     // === CALCULATION LOGIC ===
-    function recalc() {
-      const margin = parseFloat(marginSelect.value) || 0;
-      const useCustom = document.getElementById("useCustomVolume").checked;
-      const customVolume =
-        parseFloat(document.getElementById("customVolume").value) || 0;
-      const selectedVolume = parseFloat(volumeSelect.value) || 0;
-      const volume = useCustom ? customVolume : selectedVolume;
-
-      const adjusted = marketRate * (1 - margin);
-      const inverse = (1 / marketRate) * (1 - margin);
-      document.getElementById("offerRate").textContent = adjusted.toFixed(6);
-      document.getElementById("inverseRate").textContent = inverse.toFixed(6);
-
-      const baseSymbol = sym(BASE);
-      const quoteSymbol = sym(QUOTE);
-
-      if (volume > 0) {
-        document.getElementById("exchangeEUR").textContent =
-          `${baseSymbol}${volume.toLocaleString()}`;
-        document.getElementById("exchangeUSD").textContent =
-          `${quoteSymbol}${volume.toLocaleString()}`;
-
-        const offerAmount = adjusted * volume;
-        const inverseAmount = inverse * volume;
-        document.getElementById("offerAmount").textContent =
-          `${quoteSymbol}${offerAmount.toLocaleString()}`;
-        document.getElementById("inverseAmount").textContent =
-          `${baseSymbol}${inverseAmount.toLocaleString()}`;
-
-        const effectiveMargin = margin - 0.00055;
-        if (effectiveMargin > 0) {
-          const revenueEURUSD = volume * effectiveMargin;
-          const revenueUSDEUR = inverseAmount * effectiveMargin;
-
-          // Use base currency symbol for profit
-          const profitCurrency = BASE.toUpperCase();
-          const profitSymbol = sym(profitCurrency);
-
-          document.getElementById("revenueEURUSD").textContent =
-            `${profitSymbol}${revenueEURUSD.toFixed(2)}`;
-          document.getElementById("revenueUSDEUR").textContent =
-            `${profitSymbol}${revenueUSDEUR.toFixed(2)}`;
-        } else {
-          document.getElementById("revenueEURUSD").textContent = "–";
-          document.getElementById("revenueUSDEUR").textContent = "–";
-        }
+  function recalc() {
+    const margin = parseFloat(marginSelect.value) || 0;
+    const useCustom = document.getElementById("useCustomVolume").checked;
+    const customVolume =
+      parseFloat(document.getElementById("customVolume").value) || 0;
+    const selectedVolume = parseFloat(volumeSelect.value) || 0;
+    const volume = useCustom ? customVolume : selectedVolume;
+  
+    // Adjusted rates
+    const adjusted = marketRate * (1 - margin);
+    const inverse = (1 / marketRate) * (1 - margin);
+  
+    // === ROUND EXCHANGE RATES TO 4 DECIMAL PLACES ===
+    document.getElementById("offerRate").textContent = adjusted.toFixed(5);
+    document.getElementById("inverseRate").textContent = inverse.toFixed(5);
+  
+    const baseSymbol = sym(BASE);
+    const quoteSymbol = sym(QUOTE);
+  
+    if (volume > 0) {
+      // Show chosen volumes
+      document.getElementById("exchangeEUR").textContent =
+        `${baseSymbol}${volume.toLocaleString()}`;
+      document.getElementById("exchangeUSD").textContent =
+        `${quoteSymbol}${volume.toLocaleString()}`;
+  
+      // Calculate output amounts
+      const offerAmount = adjusted * volume;
+      const inverseAmount = inverse * volume;
+  
+      // === ROUND WE-CAN-OFFER AMOUNTS TO 1 DECIMAL PLACE ===
+      document.getElementById("offerAmount").textContent =
+        `${quoteSymbol}${Number(offerAmount.toFixed(2)).toLocaleString()}`;
+      document.getElementById("inverseAmount").textContent =
+        `${baseSymbol}${Number(inverseAmount.toFixed(2)).toLocaleString()}`;
+  
+      // Revenue calculations
+      const effectiveMargin = margin - 0.00055;
+  
+      if (effectiveMargin > 0) {
+        const revenueEURUSD = volume * effectiveMargin;
+        const revenueUSDEUR = inverseAmount * effectiveMargin;
+  
+        // Profit uses BASE currency
+        const profitSymbol = sym(BASE);
+  
+        // === ROUND PROFITS TO 1 DECIMAL PLACE ===
+        document.getElementById("revenueEURUSD").textContent =
+          `${profitSymbol}${(revenueEURUSD.toFixed(2))}`;
+        document.getElementById("revenueUSDEUR").textContent =
+          `${profitSymbol}${(revenueUSDEUR.toFixed(2))}`;
       } else {
-        document.getElementById("exchangeEUR").textContent = "–";
-        document.getElementById("exchangeUSD").textContent = "–";
-        document.getElementById("offerAmount").textContent = "–";
-        document.getElementById("inverseAmount").textContent = "–";
         document.getElementById("revenueEURUSD").textContent = "–";
         document.getElementById("revenueUSDEUR").textContent = "–";
       }
+    } else {
+      document.getElementById("exchangeEUR").textContent = "–";
+      document.getElementById("exchangeUSD").textContent = "–";
+      document.getElementById("offerAmount").textContent = "–";
+      document.getElementById("inverseAmount").textContent = "–";
+      document.getElementById("revenueEURUSD").textContent = "–";
+      document.getElementById("revenueUSDEUR").textContent = "–";
     }
+  }
+
 
     marginSelect.addEventListener("change", recalc);
     volumeSelect.addEventListener("change", recalc);
