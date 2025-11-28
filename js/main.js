@@ -255,7 +255,7 @@ async function main() {
     if (!pair) throw new Error(`${BASE}/${QUOTE} not found in data`);
 
     const marketRate = parseFloat(pair.rate);
-    document.getElementById("marketRate").textContent = marketRate.toFixed(6);
+    document.getElementById("marketRate").textContent = marketRate.toFixed(5);
     document.getElementById("lastUpdate").textContent =
       pair.time_of_rate || "unknown";
 
