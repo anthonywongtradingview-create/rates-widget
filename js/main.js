@@ -1,27 +1,17 @@
-// ==========================================
-// CONFIG
-// ==========================================
+// === CONFIG ===
+// Shared Google Sheet (single CSV for all currency pairs)
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=0&single=true&output=csv";
 
 const EVENTS_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=135859645&single=true&output=csv";
 
+// === BASE AND QUOTE DETECTION ===
 const BASE = window.BASE || "EUR";
 const QUOTE = window.QUOTE || "USD";
-console.log(`Loading dashboard for ${BASE}/${QUOTE}`);
+console.log(`✅ Loading data for ${BASE}/${QUOTE}`);
 
-
-// ==========================================
-// GLOBAL STATE  (important: no shadowing)
-// ==========================================
-let marketRate = 0; 
-let allRows = []; 
-
-
-// ==========================================
-// CURRENCY SYMBOLS
-// ==========================================
+// === Currency symbols ===
 const currencySymbols = {
   EUR: "€",
   USD: "$",
@@ -36,37 +26,32 @@ function sym(cur) {
   return currencySymbols[cur] || cur;
 }
 
-
-// ==========================================
-// DROPDOWNS
-// ==========================================
+// === DROPDOWNS ===
 const marginSelect = document.getElementById("margin");
 const volumeSelect = document.getElementById("volume");
 
 for (let i = 0.15; i <= 3.0; i += 0.05) {
-  let opt = document.createElement("option");
+  const opt = document.createElement("option");
   opt.value = i / 100;
   opt.textContent = i.toFixed(2) + "%";
   marginSelect.appendChild(opt);
 }
 
 for (let v = 10000; v <= 100000; v += 10000) {
-  let opt = document.createElement("option");
+  const opt = document.createElement("option");
   opt.value = v;
   opt.textContent = v.toLocaleString();
   volumeSelect.appendChild(opt);
 }
 
-
-// ==========================================
-// CSV FETCH & PARSE
-// ==========================================
+// === FETCH CSV ===
 async function fetchCSV(url) {
   const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to load CSV");
+  if (!res.ok) throw new Error("Failed to fetch CSV: " + res.status);
   return await res.text();
 }
 
+// === PARSE FX DATA CSV ===
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
@@ -76,14 +61,64 @@ function parseCSV(text) {
   });
 }
 
+// === PARSE EVENTS CSV ===
+function parseEventsCSV(text) {
+  text = text.replace(/^\uFEFF/, ""); // remove BOM if present
+  const lines = text.trim().split(/\r?\n/);
 
-// ==========================================
-// HOLIDAY + EVENTS FUNCTIONS (UNCHANGED)
-// ==========================================
+  // Skip metadata lines until we reach the header
+  while (lines.length && !lines[0].toLowerCase().includes("date_and_time")) {
+    lines.shift();
+  }
+  if (!lines.length) return [];
+
+  const header = lines.shift().split(",").map(h => h.trim().toLowerCase());
+  console.log("Parsed headers:", header);
+
+  // handle "date_and_time" or "date_and_time_"
+  const datetimeIndex =
+    header.indexOf("date_and_time") !== -1
+      ? header.indexOf("date_and_time")
+      : header.indexOf("date_and_time_");
+
+  const idx = {
+    datetime: datetimeIndex,
+    currency: header.indexOf("currency"),
+    importance: header.indexOf("importance"),
+    event: header.indexOf("event"),
+    actual: header.indexOf("actual"),
+    forecast: header.indexOf("forecast"),
+    previous: header.indexOf("previous"),
+    insights: header.indexOf("insights"),
+  };
+
+  return lines.map(line => {
+    const cols =
+      line
+        .match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+        ?.map(c => c.replace(/^"|"$/g, "").trim()) || [];
+
+    return {
+      datetime: idx.datetime >= 0 ? (cols[idx.datetime] || "") : "",
+      currency: idx.currency >= 0 ? (cols[idx.currency] || "") : "",
+      importance: idx.importance >= 0 ? (cols[idx.importance] || "") : "",
+      event: idx.event >= 0 ? (cols[idx.event] || "") : "",
+      actual: idx.actual >= 0 ? (cols[idx.actual] || "") : "",
+      forecast: idx.forecast >= 0 ? (cols[idx.forecast] || "") : "",
+      previous: idx.previous >= 0 ? (cols[idx.previous] || "") : "",
+      insights: idx.insights >= 0 ? (cols[idx.insights] || "") : "",
+    };
+  });
+}
+
+// === Render Holidays Table ===
 function toDate(day, monAbbr, year) {
-  const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const months = [
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+  ];
   const m = months.indexOf(String(monAbbr).toUpperCase());
-  return new Date(`${year}-${m + 1}-${day}`);
+  return m >= 0 ? new Date(`${year}-${m + 1}-${day}`) : new Date();
 }
 
 function renderCombinedTable(id, holidays) {
@@ -95,11 +130,10 @@ function renderCombinedTable(id, holidays) {
     return;
   }
 
-  const rows = holidays
-    .map(
-      h => `<tr><td>${h.jsDate.toLocaleDateString()}</td><td>${h.region}</td><td>${h.name}</td></tr>`
-    )
-    .join("");
+  const rows = holidays.map(
+    h =>
+      `<tr><td>${h.jsDate.toLocaleDateString()}</td><td>${h.region}</td><td>${h.name}</td></tr>`
+  ).join("");
 
   el.innerHTML = `
     <table>
@@ -108,132 +142,259 @@ function renderCombinedTable(id, holidays) {
     </table>`;
 }
 
-// --- events parser omitted for brevity, keep your current version ---
-function parseEventsCSV(text) {
-  // (same function you pasted — keep it)
-}
-
+// === Render Economic Events Table ===
 function renderEventsTable(id, events, limit = 10) {
-  // (same function you pasted — keep it)
-}
+  const el = document.getElementById(id);
+  console.log("Rendering events table, total:", events.length);
+  if (!el) return;
 
+  if (!events.length) {
+    el.innerHTML = "<p>No upcoming events found.</p>";
+    return;
+  }
 
+  const rows = events.slice(0, limit).map(ev => {
+    let dateStr = "";
 
-// ==========================================
-// MAIN INITIALISATION
-// ==========================================
-async function main() {
-  try {
-    console.log("Starting main()");
+    if (ev.datetime) {
+      const raw = ev.datetime.trim();
+      let parsed = null;
 
-    // ------------------------------------------
-    // 1) EURUSD LIVE (Cloudflare Worker)
-    // ------------------------------------------
-    if (BASE === "EUR" && QUOTE === "USD") {
-      try {
-        const url =
-          `https://fxi-worker.anthonywongtradingview.workers.dev/api/live-refresh?pair=EURUSD`;
-        const res = await fetch(url);
-        const live = await res.json();
+      const m = raw.match(
+        /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}:\d{2}(?::\d{2})?)$/
+      );
+      if (m) {
+        const [, month, day, year, timePart] = m;
+        const iso = `${year}-${month.padStart(2, "0")}-${day.padStart(
+          2,
+          "0"
+        )}T${timePart}`;
+        parsed = new Date(iso);
+      }
 
-        if (live.price) {
-          marketRate = parseFloat(live.price);
+      if (!parsed || isNaN(parsed)) {
+        const tryNative = new Date(raw);
+        if (!isNaN(tryNative)) parsed = tryNative;
+      }
 
-          document.getElementById("marketRate").textContent = marketRate.toFixed(5);
-          document.getElementById("lastUpdate").textContent =
-            new Date(live.refreshed_at).toLocaleTimeString();
-        }
-      } catch (err) {
-        console.error("Live EURUSD failed:", err);
+      if (parsed && !isNaN(parsed)) {
+        dateStr = parsed.toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } else {
+        dateStr = raw;
       }
     }
 
-    // ------------------------------------------
-    // 2) Google Sheets fallback (ALL other pairs)
-    // ------------------------------------------
-    if (marketRate === 0) {
-      console.log("Using Google Sheets fallback");
-      const csvText = await fetchCSV(CSV_URL);
-      allRows = parseCSV(csvText);
+    let link = ev.insights || "";
+    link = link.replace(/^"+|"+$/g, "").trim();
 
-      const pairRow = allRows.find(r => r.base === BASE && r.quote === QUOTE);
-      if (!pairRow) throw new Error(`${BASE}/${QUOTE} not found in sheet`);
+    const insightsCell =
+      link && link.startsWith("http")
+        ? `<a href="${link}" target="_blank" class="insight-btn">View</a>`
+        : (link ? `<span>${link}</span>` : `<span style="color:#ccc;">—</span>`);
 
-      marketRate = parseFloat(pairRow.rate);
+    return `
+      <tr>
+        <td style="width:22%;white-space:nowrap;">${dateStr}</td>
+        <td style="width:10%;text-align:center;">${ev.currency}</td>
+        <td style="width:18%;text-align:center;">${ev.importance}</td>
+        <td style="width:40%;">${ev.event}</td>
+        <td style="width:10%;text-align:center;">${insightsCell}</td>
+      </tr>`;
+  }).join("");
 
-      document.getElementById("marketRate").textContent = marketRate.toFixed(5);
-      document.getElementById("lastUpdate").textContent =
-        pairRow.time_of_rate || "unknown";
+  el.innerHTML = `
+    <table class="events-table" style="font-size:13px;width:100%;border-collapse:collapse;table-layout:fixed;">
+      <thead>
+        <tr>
+          <th style="width:22%;">Date & Time</th>
+          <th style="width:10%;">Currency</th>
+          <th style="width:18%;">Importance</th>
+          <th style="width:40%;">Event</th>
+          <th style="width:10%;">Insights</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// === GLOBAL marketRate (used by recalc + refresh) ===
+let marketRate = 0;
+
+// === MAIN ===
+async function main() {
+  try {
+    // 1) Load FX rates from Google Sheet (for ALL pairs)
+    const csvText = await fetchCSV(CSV_URL);
+    const allRows = parseCSV(csvText);
+
+    const pair = allRows.find(r => r.base === BASE && r.quote === QUOTE);
+    if (!pair) throw new Error(`${BASE}/${QUOTE} not found in data`);
+
+    marketRate = parseFloat(pair.rate);
+    document.getElementById("marketRate").textContent = marketRate.toFixed(5);
+    document.getElementById("lastUpdate").textContent =
+      pair.time_of_rate || "unknown";
+
+    // 2) If EURUSD, optionally override with live API
+    if (BASE === "EUR" && QUOTE === "USD") {
+      try {
+        const apiUrl =
+          `https://fxi-worker.anthonywongtradingview.workers.dev/api/live-refresh?pair=EURUSD`;
+        const res = await fetch(apiUrl);
+        const liveData = await res.json();
+
+        if (liveData.price) {
+          marketRate = parseFloat(liveData.price);
+          document.getElementById("marketRate").textContent =
+            marketRate.toFixed(5);
+          document.getElementById("lastUpdate").textContent =
+            new Date(liveData.refreshed_at).toLocaleTimeString();
+        } else {
+          console.error("Live EURUSD fetch error:", liveData);
+        }
+      } catch (err) {
+        console.error("Error fetching live EURUSD:", err);
+      }
     }
 
-    // ------------------------------------------
-    // 3) Load CSV if EURUSD used live
-    // ------------------------------------------
-    if (allRows.length === 0) {
-      const csvText = await fetchCSV(CSV_URL);
-      allRows = parseCSV(csvText);
-    }
-
-    // ------------------------------------------
-    // 4) Holidays
-    // ------------------------------------------
+    // === HOLIDAYS ===
     const holidays = [];
     allRows.forEach(row => {
       [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
-        const y = row[`year_${cur}`];
-        const m = row[`month_${cur}`];
-        const d = row[`day_${cur}`];
-        const n = row[`name_${cur}`];
-        if (y && m && d && n) {
+        const year = row[`year_${cur}`];
+        const month = row[`month_${cur}`];
+        const day = row[`day_${cur}`];
+        const name = row[`name_${cur}`];
+        if (year && month && day && name) {
           holidays.push({
             region: cur.toUpperCase(),
-            jsDate: toDate(d, m, y),
-            name: n
+            jsDate: toDate(day, month, year),
+            name,
           });
         }
       });
     });
 
-    renderCombinedTable("combinedHolidays", holidays.slice(0, 5));
+    const today = new Date();
+    const upcoming = holidays
+      .filter(h => h.jsDate >= today)
+      .sort((a, b) => a.jsDate - b.jsDate)
+      .slice(0, 5);
+    renderCombinedTable("combinedHolidays", upcoming);
 
-    // ------------------------------------------
-    // 5) Events
-    // ------------------------------------------
+    // === EVENTS ===
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
-    const events = parseEventsCSV(eventsCSV).filter(
-      ev =>
-        ev.currency &&
-        (ev.currency.toUpperCase() === BASE || ev.currency.toUpperCase() === QUOTE)
-    );
+    let events = parseEventsCSV(eventsCSV);
+
+    events = events
+      .filter(
+        ev =>
+          ev.currency &&
+          (ev.currency.toUpperCase() === BASE.toUpperCase() ||
+            ev.currency.toUpperCase() === QUOTE.toUpperCase())
+      )
+      .slice(0, 10);
+
     renderEventsTable("upcomingEvents", events, 10);
 
-    // ------------------------------------------
-    // 6) First calculation
-    // ------------------------------------------
+    // === CALCULATION LOGIC (closure over marketRate) ===
+    function recalc() {
+      const margin = parseFloat(marginSelect.value) || 0;
+      const useCustom = document.getElementById("useCustomVolume").checked;
+      const customVolume =
+        parseFloat(document.getElementById("customVolume").value) || 0;
+      const selectedVolume = parseFloat(volumeSelect.value) || 0;
+      const volume = useCustom ? customVolume : selectedVolume;
+
+      const adjusted = marketRate * (1 - margin);
+      const inverse = (1 / marketRate) * (1 - margin);
+
+      document.getElementById("offerRate").textContent = adjusted.toFixed(5);
+      document.getElementById("inverseRate").textContent = inverse.toFixed(5);
+
+      const baseSymbol = sym(BASE);
+      const quoteSymbol = sym(QUOTE);
+
+      if (volume > 0) {
+        document.getElementById("exchangeEUR").textContent =
+          `${baseSymbol}${volume.toLocaleString()}`;
+        document.getElementById("exchangeUSD").textContent =
+          `${quoteSymbol}${volume.toLocaleString()}`;
+
+        const offerAmount = adjusted * volume;
+        const inverseAmount = inverse * volume;
+
+        document.getElementById("offerAmount").textContent =
+          `${quoteSymbol}${Number(offerAmount.toFixed(2)).toLocaleString()}`;
+        document.getElementById("inverseAmount").textContent =
+          `${baseSymbol}${Number(inverseAmount.toFixed(2)).toLocaleString()}`;
+
+        const effectiveMargin = margin - 0.00055;
+
+        if (effectiveMargin > 0) {
+          const revenueEURUSD = volume * effectiveMargin;
+          const revenueUSDEUR = inverseAmount * effectiveMargin;
+
+          const profitSymbol = sym(BASE);
+
+          document.getElementById("revenueEURUSD").textContent =
+            `${profitSymbol}${(revenueEURUSD.toFixed(2))}`;
+          document.getElementById("revenueUSDEUR").textContent =
+            `${profitSymbol}${(revenueUSDEUR.toFixed(2))}`;
+        } else {
+          document.getElementById("revenueEURUSD").textContent = "–";
+          document.getElementById("revenueUSDEUR").textContent = "–";
+        }
+      } else {
+        document.getElementById("exchangeEUR").textContent = "–";
+        document.getElementById("exchangeUSD").textContent = "–";
+        document.getElementById("offerAmount").textContent = "–";
+        document.getElementById("inverseAmount").textContent = "–";
+        document.getElementById("revenueEURUSD").textContent = "–";
+        document.getElementById("revenueUSDEUR").textContent = "–";
+      }
+    }
+
+    // Hook up events once per page load
+    marginSelect.addEventListener("change", recalc);
+    volumeSelect.addEventListener("change", recalc);
+    document.getElementById("customVolume").addEventListener("input", recalc);
+    document
+      .getElementById("useCustomVolume")
+      .addEventListener("change", recalc);
+
+    // Initial calculation
     recalc();
 
-  } catch (err) {
-    console.error("MAIN ERROR:", err);
-    document.body.innerHTML = `<p style="color:red">${err.message}</p>`;
+    // Expose recalc so refresh can call it
+    window._recalcFX = recalc;
+
+  } catch (e) {
+    document.body.innerHTML = `<p style="color:red">${e.message}</p>`;
+    console.error(e);
   }
 }
 
-
-
-// ==========================================
-// LIVE REFRESH BUTTON (EURUSD ONLY)
-// ==========================================
+// === REFRESH LIVE RATE (EURUSD only) ===
 async function refreshLiveRate() {
-  if (BASE !== "EUR" || QUOTE !== "USD") return;
+  if (BASE !== "EUR" || QUOTE !== "USD") return; // only for EURUSD
 
   try {
-    const url =
+    const apiUrl =
       `https://fxi-worker.anthonywongtradingview.workers.dev/api/live-refresh?pair=EURUSD`;
-
-    const res = await fetch(url);
+    const res = await fetch(apiUrl);
     const data = await res.json();
 
-    if (!data.price) return;
+    if (!data.price) {
+      console.error("Refresh error:", data);
+      return;
+    }
 
     marketRate = parseFloat(data.price);
 
@@ -241,66 +402,16 @@ async function refreshLiveRate() {
     document.getElementById("lastUpdate").textContent =
       new Date(data.refreshed_at).toLocaleTimeString();
 
-    recalc();
+    if (typeof window._recalcFX === "function") {
+      window._recalcFX();
+    }
   } catch (err) {
-    console.error("Refresh error:", err);
+    console.error("Error refreshing live rate:", err);
   }
 }
 
 document.getElementById("refreshRateBtn")
   .addEventListener("click", refreshLiveRate);
 
-
-
-// ==========================================
-// CALCULATION LOGIC
-// ==========================================
-function recalc() {
-  if (!marketRate || isNaN(marketRate)) return;
-
-  const margin = parseFloat(marginSelect.value) || 0;
-  const useCustom = document.getElementById("useCustomVolume").checked;
-  const customVolume =
-    parseFloat(document.getElementById("customVolume").value) || 0;
-
-  const volume = useCustom
-    ? customVolume
-    : parseFloat(volumeSelect.value) || 0;
-
-  const adjusted = marketRate * (1 - margin);
-  const inverse = (1 / marketRate) * (1 - margin);
-
-  document.getElementById("offerRate").textContent = adjusted.toFixed(5);
-  document.getElementById("inverseRate").textContent = inverse.toFixed(5);
-
-  const baseSymbol = sym(BASE);
-  const quoteSymbol = sym(QUOTE);
-
-  if (volume > 0) {
-    document.getElementById("exchangeEUR").textContent =
-      `${baseSymbol}${volume.toLocaleString()}`;
-    document.getElementById("exchangeUSD").textContent =
-      `${quoteSymbol}${volume.toLocaleString()}`;
-
-    const offerAmount = adjusted * volume;
-    const inverseAmount = inverse * volume;
-
-    document.getElementById("offerAmount").textContent =
-      `${quoteSymbol}${offerAmount.toFixed(2)}`;
-    document.getElementById("inverseAmount").textContent =
-      `${baseSymbol}${inverseAmount.toFixed(2)}`;
-
-  } else {
-    document.getElementById("exchangeEUR").textContent = "–";
-    document.getElementById("exchangeUSD").textContent = "–";
-    document.getElementById("offerAmount").textContent = "–";
-    document.getElementById("inverseAmount").textContent = "–";
-  }
-}
-
-
-
-// ==========================================
-// START
-// ==========================================
+// Kick everything off
 main();
