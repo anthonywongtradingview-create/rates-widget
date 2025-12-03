@@ -247,17 +247,61 @@ function renderEventsTable(id, events, limit = 10) {
 // === MAIN ===
 async function main() {
   try {
-    // Load FX rates
-    const csvText = await fetchCSV(CSV_URL);
-    const allRows = parseCSV(csvText);
 
-    const pair = allRows.find(r => r.base === BASE && r.quote === QUOTE);
-    if (!pair) throw new Error(`${BASE}/${QUOTE} not found in data`);
+    // ===================================================
+    // === FX RATE LOADING (HYBRID — EURUSD uses LIVE) ===
+    // ===================================================
 
-    const marketRate = parseFloat(pair.rate);
-    document.getElementById("marketRate").textContent = marketRate.toFixed(5);
-    document.getElementById("lastUpdate").textContent =
-      pair.time_of_rate || "unknown";
+    let marketRate;
+    let allRows = []; // <-- ensure available for holidays/events later
+
+    // If EURUSD → use TwelveData Worker
+    if (BASE === "EUR" && QUOTE === "USD") {
+      try {
+        const apiUrl = `https://fxi-worker.anthonywongtradingview.workers.dev/api/live-refresh?pair=EURUSD`;
+        const res = await fetch(apiUrl);
+        const liveData = await res.json();
+
+        if (liveData.price) {
+          marketRate = parseFloat(liveData.price);
+
+          document.getElementById("marketRate").textContent =
+            marketRate.toFixed(5);
+
+          document.getElementById("lastUpdate").textContent =
+            new Date(liveData.refreshed_at).toLocaleTimeString();
+        } else {
+          console.error("Live EURUSD fetch error:", liveData);
+        }
+      } catch (err) {
+        console.error("Error fetching live EURUSD:", err);
+      }
+    }
+
+    // If NOT EURUSD → or if live fetch failed → use Google Sheets CSV
+    if (marketRate === undefined) {
+      const csvText = await fetchCSV(CSV_URL);
+      allRows = parseCSV(csvText);
+
+      const pair = allRows.find(r => r.base === BASE && r.quote === QUOTE);
+      if (!pair) throw new Error(`${BASE}/${QUOTE} not found in data`);
+
+      marketRate = parseFloat(pair.rate);
+
+      document.getElementById("marketRate").textContent =
+        marketRate.toFixed(5);
+
+      document.getElementById("lastUpdate").textContent =
+        pair.time_of_rate || "unknown";
+    }
+
+    // === COMMON: All remaining logic uses allRows ===
+
+    // If we loaded live for EURUSD, load CSV now just for holiday/event data
+    if (allRows.length === 0) {
+      const csvText = await fetchCSV(CSV_URL);
+      allRows = parseCSV(csvText);
+    }
 
     // === HOLIDAYS ===
     const holidays = [];
@@ -288,7 +332,6 @@ async function main() {
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
     let events = parseEventsCSV(eventsCSV);
 
-    // Filter only events relevant to current pair (BASE / QUOTE)
     events = events
       .filter(
         ev =>
@@ -296,9 +339,14 @@ async function main() {
           (ev.currency.toUpperCase() === BASE.toUpperCase() ||
             ev.currency.toUpperCase() === QUOTE.toUpperCase())
       )
-      .slice(0, 10); // next 10 events for this pair
+      .slice(0, 10);
 
     renderEventsTable("upcomingEvents", events, 10);
+
+  } catch (err) {
+    console.error("MAIN ERROR:", err);
+  }
+}
 
     // === CALCULATION LOGIC ===
   function recalc() {
