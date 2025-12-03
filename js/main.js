@@ -244,7 +244,16 @@ function renderEventsTable(id, events, limit = 10) {
   });
 }
 
-// === MAIN ===
+// ==========================================
+// GLOBAL STATE (needed for recalc & refresh)
+// ==========================================
+let marketRate = 0; // <-- Global so both main() and refreshLiveRate() share it
+
+
+
+// ==========================================
+// MAIN INITIALISATION
+// ==========================================
 async function main() {
   try {
 
@@ -252,13 +261,14 @@ async function main() {
     // === FX RATE LOADING (HYBRID — EURUSD uses LIVE) ===
     // ===================================================
 
-    let marketRate;
-    let allRows = []; // <-- ensure available for holidays/events later
+    let allRows = []; // for holidays/events later
 
-    // If EURUSD → use TwelveData Worker
+    // --- EURUSD: Live via Cloudflare Worker / TwelveData ---
     if (BASE === "EUR" && QUOTE === "USD") {
       try {
-        const apiUrl = `https://fxi-worker.anthonywongtradingview.workers.dev/api/live-refresh?pair=EURUSD`;
+        const apiUrl =
+          `https://fxi-worker.anthonywongtradingview.workers.dev/api/live-refresh?pair=EURUSD`;
+
         const res = await fetch(apiUrl);
         const liveData = await res.json();
 
@@ -267,7 +277,6 @@ async function main() {
 
           document.getElementById("marketRate").textContent =
             marketRate.toFixed(5);
-
           document.getElementById("lastUpdate").textContent =
             new Date(liveData.refreshed_at).toLocaleTimeString();
         } else {
@@ -278,8 +287,8 @@ async function main() {
       }
     }
 
-    // If NOT EURUSD → or if live fetch failed → use Google Sheets CSV
-    if (marketRate === undefined) {
+    // --- OTHER PAIRS or EURUSD fallback: Google Sheets CSV ---
+    if (marketRate === 0) {
       const csvText = await fetchCSV(CSV_URL);
       allRows = parseCSV(csvText);
 
@@ -290,20 +299,21 @@ async function main() {
 
       document.getElementById("marketRate").textContent =
         marketRate.toFixed(5);
-
       document.getElementById("lastUpdate").textContent =
         pair.time_of_rate || "unknown";
     }
 
-    // === COMMON: All remaining logic uses allRows ===
-
-    // If we loaded live for EURUSD, load CSV now just for holiday/event data
+    // --- If EURUSD came from live, still need CSV for holidays/events ---
     if (allRows.length === 0) {
       const csvText = await fetchCSV(CSV_URL);
       allRows = parseCSV(csvText);
     }
 
-    // === HOLIDAYS ===
+
+
+    // ==========================================
+    // HOLIDAYS
+    // ==========================================
     const holidays = [];
     allRows.forEach(row => {
       [BASE.toLowerCase(), QUOTE.toLowerCase()].forEach(cur => {
@@ -311,6 +321,7 @@ async function main() {
         const month = row[`month_${cur}`];
         const day = row[`day_${cur}`];
         const name = row[`name_${cur}`];
+
         if (year && month && day && name) {
           holidays.push({
             region: cur.toUpperCase(),
@@ -326,9 +337,14 @@ async function main() {
       .filter(h => h.jsDate >= today)
       .sort((a, b) => a.jsDate - b.jsDate)
       .slice(0, 5);
+
     renderCombinedTable("combinedHolidays", upcoming);
 
-    // === EVENTS ===
+
+
+    // ==========================================
+    // ECONOMIC EVENTS
+    // ==========================================
     const eventsCSV = await fetchCSV(EVENTS_CSV_URL);
     let events = parseEventsCSV(eventsCSV);
 
@@ -337,96 +353,137 @@ async function main() {
         ev =>
           ev.currency &&
           (ev.currency.toUpperCase() === BASE.toUpperCase() ||
-            ev.currency.toUpperCase() === QUOTE.toUpperCase())
+           ev.currency.toUpperCase() === QUOTE.toUpperCase())
       )
       .slice(0, 10);
 
     renderEventsTable("upcomingEvents", events, 10);
 
-  } catch (err) {
-    console.error("MAIN ERROR:", err);
-  }
-}
-
-    // === CALCULATION LOGIC ===
-  function recalc() {
-    const margin = parseFloat(marginSelect.value) || 0;
-    const useCustom = document.getElementById("useCustomVolume").checked;
-    const customVolume =
-      parseFloat(document.getElementById("customVolume").value) || 0;
-    const selectedVolume = parseFloat(volumeSelect.value) || 0;
-    const volume = useCustom ? customVolume : selectedVolume;
-  
-    // Adjusted rates
-    const adjusted = marketRate * (1 - margin);
-    const inverse = (1 / marketRate) * (1 - margin);
-  
-    // === ROUND EXCHANGE RATES TO 4 DECIMAL PLACES ===
-    document.getElementById("offerRate").textContent = adjusted.toFixed(5);
-    document.getElementById("inverseRate").textContent = inverse.toFixed(5);
-  
-    const baseSymbol = sym(BASE);
-    const quoteSymbol = sym(QUOTE);
-  
-    if (volume > 0) {
-      // Show chosen volumes
-      document.getElementById("exchangeEUR").textContent =
-        `${baseSymbol}${volume.toLocaleString()}`;
-      document.getElementById("exchangeUSD").textContent =
-        `${quoteSymbol}${volume.toLocaleString()}`;
-  
-      // Calculate output amounts
-      const offerAmount = adjusted * volume;
-      const inverseAmount = inverse * volume;
-  
-      // === ROUND WE-CAN-OFFER AMOUNTS TO 1 DECIMAL PLACE ===
-      document.getElementById("offerAmount").textContent =
-        `${quoteSymbol}${Number(offerAmount.toFixed(2)).toLocaleString()}`;
-      document.getElementById("inverseAmount").textContent =
-        `${baseSymbol}${Number(inverseAmount.toFixed(2)).toLocaleString()}`;
-  
-      // Revenue calculations
-      const effectiveMargin = margin - 0.00055;
-  
-      if (effectiveMargin > 0) {
-        const revenueEURUSD = volume * effectiveMargin;
-        const revenueUSDEUR = inverseAmount * effectiveMargin;
-  
-        // Profit uses BASE currency
-        const profitSymbol = sym(BASE);
-  
-        // === ROUND PROFITS TO 1 DECIMAL PLACE ===
-        document.getElementById("revenueEURUSD").textContent =
-          `${profitSymbol}${(revenueEURUSD.toFixed(2))}`;
-        document.getElementById("revenueUSDEUR").textContent =
-          `${profitSymbol}${(revenueUSDEUR.toFixed(2))}`;
-      } else {
-        document.getElementById("revenueEURUSD").textContent = "–";
-        document.getElementById("revenueUSDEUR").textContent = "–";
-      }
-    } else {
-      document.getElementById("exchangeEUR").textContent = "–";
-      document.getElementById("exchangeUSD").textContent = "–";
-      document.getElementById("offerAmount").textContent = "–";
-      document.getElementById("inverseAmount").textContent = "–";
-      document.getElementById("revenueEURUSD").textContent = "–";
-      document.getElementById("revenueUSDEUR").textContent = "–";
-    }
-  }
 
 
-    marginSelect.addEventListener("change", recalc);
-    volumeSelect.addEventListener("change", recalc);
-    document.getElementById("customVolume").addEventListener("input", recalc);
-    document
-      .getElementById("useCustomVolume")
-      .addEventListener("change", recalc);
+    // ==========================================
+    // INITIAL CALCULATION
+    // ==========================================
     recalc();
 
   } catch (e) {
     document.body.innerHTML = `<p style="color:red">${e.message}</p>`;
-    console.error(e);
+    console.error("MAIN ERROR:", e);
   }
 }
 
+
+
+// ==========================================
+// LIVE REFRESH BUTTON LOGIC (EURUSD only)
+// ==========================================
+async function refreshLiveRate() {
+  if (BASE === "EUR" && QUOTE === "USD") {
+    const apiUrl =
+      `https://fxi-worker.anthonywongtradingview.workers.dev/api/live-refresh?pair=EURUSD`;
+
+    try {
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+
+      if (!data.price) {
+        console.error("Refresh error:", data);
+        return;
+      }
+
+      const price = parseFloat(data.price);
+
+      // Update UI
+      document.getElementById("marketRate").textContent = price.toFixed(5);
+      document.getElementById("lastUpdate").textContent =
+        new Date(data.refreshed_at).toLocaleTimeString();
+
+      // Update the shared global rate
+      marketRate = price;
+
+      // Recalculate offers
+      recalc();
+
+    } catch (err) {
+      console.error("Error refreshing live rate:", err);
+    }
+  }
+}
+
+
+
+// ==========================================
+// CONNECT BUTTON
+// ==========================================
+document.getElementById("refreshRateBtn")
+  .addEventListener("click", refreshLiveRate);
+
+
+
+// ==========================================
+// CALCULATION LOGIC
+// ==========================================
+function recalc() {
+  const margin = parseFloat(marginSelect.value) || 0;
+  const useCustom = document.getElementById("useCustomVolume").checked;
+  const customVolume =
+    parseFloat(document.getElementById("customVolume").value) || 0;
+  const selectedVolume = parseFloat(volumeSelect.value) || 0;
+  const volume = useCustom ? customVolume : selectedVolume;
+
+  // Adjusted rates
+  const adjusted = marketRate * (1 - margin);
+  const inverse = (1 / marketRate) * (1 - margin);
+
+  document.getElementById("offerRate").textContent = adjusted.toFixed(5);
+  document.getElementById("inverseRate").textContent = inverse.toFixed(5);
+
+  const baseSymbol = sym(BASE);
+  const quoteSymbol = sym(QUOTE);
+
+  if (volume > 0) {
+    document.getElementById("exchangeEUR").textContent =
+      `${baseSymbol}${volume.toLocaleString()}`;
+    document.getElementById("exchangeUSD").textContent =
+      `${quoteSymbol}${volume.toLocaleString()}`;
+
+    const offerAmount = adjusted * volume;
+    const inverseAmount = inverse * volume;
+
+    document.getElementById("offerAmount").textContent =
+      `${quoteSymbol}${Number(offerAmount.toFixed(2)).toLocaleString()}`;
+    document.getElementById("inverseAmount").textContent =
+      `${baseSymbol}${Number(inverseAmount.toFixed(2)).toLocaleString()}`;
+
+    const effectiveMargin = margin - 0.00055;
+
+    if (effectiveMargin > 0) {
+      const revenueEURUSD = volume * effectiveMargin;
+      const revenueUSDEUR = inverseAmount * effectiveMargin;
+
+      const profitSymbol = sym(BASE);
+
+      document.getElementById("revenueEURUSD").textContent =
+        `${profitSymbol}${(revenueEURUSD.toFixed(2))}`;
+      document.getElementById("revenueUSDEUR").textContent =
+        `${profitSymbol}${(revenueUSDEUR.toFixed(2))}`;
+    } else {
+      document.getElementById("revenueEURUSD").textContent = "–";
+      document.getElementById("revenueUSDEUR").textContent = "–";
+    }
+  } else {
+    document.getElementById("exchangeEUR").textContent = "–";
+    document.getElementById("exchangeUSD").textContent = "–";
+    document.getElementById("offerAmount").textContent = "–";
+    document.getElementById("inverseAmount").textContent = "–";
+    document.getElementById("revenueEURUSD").textContent = "–";
+    document.getElementById("revenueUSDEUR").textContent = "–";
+  }
+}
+
+
+
+// ==========================================
+// START
+// ==========================================
 main();
