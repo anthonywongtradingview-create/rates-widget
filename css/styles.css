@@ -184,6 +184,27 @@ tr {
   background-color: #f5fff5;
 }
 
+/* === Copy Button Styles === */
+.copy-cell-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.copy-cell-btn:hover {
+  opacity: 1;
+  background: #e5e7eb;
+}
+
+
 /* === Rates Header Flex Layout === */
 .rates-header {
   display: flex;
