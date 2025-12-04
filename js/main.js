@@ -486,31 +486,26 @@ function attachCalcListeners() {
 }
 
 // Copy Sentence for Texting 
-function copyOfferSentence(directionId) {
-  try {
-    const label = document.getElementById(`${directionId}Label`).textContent.trim();
-    const rate = document.getElementById(`${directionId}Rate`).textContent.trim();
-    const timestamp = document.getElementById("lastUpdate").textContent.trim();
+function copyOfferSentence(which) {
+  const timestamp = document.getElementById("lastUpdate").innerText.trim();
 
-    const btn = event.currentTarget;
+  const label = document.getElementById(which + "Label").innerText.trim();
+  const rate = document.getElementById(which + "Rate").innerText.trim();
 
-    const sentence = `What we can offer for ${label} at — ${timestamp} is ${rate}.`;
+  const sentence = `What we can offer for ${label} at — ${timestamp} is ${rate}.`;
 
-    navigator.clipboard.writeText(sentence).then(() => {
+  navigator.clipboard.writeText(sentence).then(() => {
+    const btn = document.querySelector(`button[onclick="copyOfferSentence('${which}')"]`);
 
-      // add animation class
-      btn.classList.add("copied");
+    // flash green animation
+    btn.classList.add("copied");
+    btn.innerText = "✓";
 
-      // remove flash after 1 second
-      setTimeout(() => btn.classList.remove("copied"), 1000);
-
-    }).catch(err => {
-      console.error("Clipboard error:", err);
-    });
-
-  } catch (e) {
-    console.error("Copy error:", e);
-  }
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.innerText = "📋";
+    }, 1000);
+  });
 }
 
 
