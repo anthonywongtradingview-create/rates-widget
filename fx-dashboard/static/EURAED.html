@@ -55,11 +55,22 @@
       <tbody>
         <tr>
           <td><strong>EUR&gt;AED</strong></td>
-          <td id="offerRate">–</td>
+          <td style="position:relative; text-align:right;">
+            <span id="offerRate">–</span>
+        
+            <button class="copy-cell-btn"
+                    onclick="copyDashboardRate('EUR', 'AED')">📋</button>
+          </td>
         </tr>
+        
         <tr>
           <td><strong>AED&gt;EUR</strong></td>
-          <td id="inverseRate">–</td>
+          <td style="position:relative; text-align:right;">
+            <span id="inverseRate">–</span>
+        
+            <button class="copy-cell-btn"
+                    onclick="copyDashboardRate('AED', 'EUR')">📋</button>
+          </td>
         </tr>
       </tbody>
     </table>
