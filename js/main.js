@@ -1,10 +1,7 @@
-// ============================
-// FX DASHBOARD FRONTEND LOGIC
-// ============================
 
 // ---------- CONFIG ----------
 
-// Shared Google Sheet (single CSV for all currency pairs)
+// Shared Google Sheet
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_1Df4oUf4sjTdt75U-dcQ5GiMKPmKs1GAOke-rfIck4dwoAS8jua_vjvlMhOou4Huyjd5o2B3FSlB/pub?gid=0&single=true&output=csv";
 
@@ -236,15 +233,11 @@ function renderEventsTable(id, events, limit = 10) {
 }
 
 
-// ==========================================
 // GLOBAL STATE (shared by main + recalc)
-// ==========================================
 let marketRate = 0;
 
 
-// ==========================================
 // MAIN INITIALISATION
-// ==========================================
 async function main() {
   try {
     // 1) Load main FX CSV (for all pairs, and for holidays)
@@ -362,9 +355,7 @@ async function main() {
 }
 
 
-// ==========================================
 // LIVE REFRESH (EURUSD ONLY)
-// ==========================================
 async function refreshLiveRate() {
   if (BASE !== "EUR" || QUOTE !== "USD") return;
 
@@ -391,9 +382,7 @@ async function refreshLiveRate() {
 }
 
 
-// ==========================================
 // CALCULATION LOGIC
-// ==========================================
 function recalc() {
   const margin = parseFloat(marginSelect.value) || 0;
   const useCustom = document.getElementById("useCustomVolume").checked;
@@ -467,7 +456,5 @@ function attachCalcListeners() {
 }
 
 
-// ==========================================
 // BOOTSTRAP
-// ==========================================
 main();
