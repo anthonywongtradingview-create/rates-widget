@@ -184,25 +184,38 @@ tr {
   background-color: #f5fff5;
 }
 
-/* === Copy Button Styles === */
+/* --- Copy Button Fix + Animation --- */
+.copy-cell-wrapper {
+  position: relative;
+  text-align: right;
+  padding-right: 40px; /* keeps rate centered */
+}
+
 .copy-cell-btn {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 12px;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 4px;
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.15s, background 0.15s;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
 }
 
 .copy-cell-btn:hover {
-  opacity: 1;
-  background: #e5e7eb;
+  background: #f0f0f0;
 }
+
+/* Animated success feedback */
+.copy-cell-btn.copied {
+  background: #d4ffd4 !important;
+  border-color: #6ac26a !important;
+}
+
 
 
 /* === Rates Header Flex Layout === */
