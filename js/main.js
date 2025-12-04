@@ -492,24 +492,24 @@ function copyOfferSentence(directionId) {
     const rate = document.getElementById(`${directionId}Rate`).textContent.trim();
     const timestamp = document.getElementById("lastUpdate").textContent.trim();
 
-    if (!label || !rate || !timestamp) {
-      alert("Unable to copy — missing data.");
-      return;
-    }
+    const btn = event.currentTarget;
 
     const sentence = `What we can offer for ${label} at — ${timestamp} is ${rate}.`;
 
     navigator.clipboard.writeText(sentence).then(() => {
-      // Optional confirmation
-      console.log("Copied:", sentence);
+
+      // add animation class
+      btn.classList.add("copied");
+
+      // remove flash after 1 second
+      setTimeout(() => btn.classList.remove("copied"), 1000);
+
     }).catch(err => {
       console.error("Clipboard error:", err);
-      alert("Copy failed.");
     });
 
   } catch (e) {
-    console.error("Copy function error:", e);
-    alert("Copy failed.");
+    console.error("Copy error:", e);
   }
 }
 
