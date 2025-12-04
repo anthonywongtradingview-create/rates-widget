@@ -486,25 +486,23 @@ function attachCalcListeners() {
 }
 
 // Copy Sentence for Texting 
-function copyOfferSentence(which) {
-  const timestamp = document.getElementById("lastUpdate").innerText.trim();
+function copyOfferSentence(direction) {
+  const ts = document.getElementById("lastUpdate").innerText.trim();
 
-  const label = document.getElementById(which + "Label").innerText.trim();  // EUR → AED
-  const rate = document.getElementById(which + "Rate").innerText.trim();    // e.g. 4.27777
+  const label = document.getElementById(direction + "Label").innerText.trim();
+  const rate  = document.getElementById(direction + "Rate").innerText.trim();
 
-  const sentence = `We can offer for ${label} at — ${timestamp} is ${rate}.`;
+  const sentence = `We can offer for ${label} at — ${ts} is ${rate}.`;
 
   navigator.clipboard.writeText(sentence).then(() => {
-    const btn = document.querySelector(`button[onclick="copyOfferSentence('${which}')"]`);
+    const btn = document.querySelector(
+      `button[onclick="copyOfferSentence('${direction}')"]`
+    );
+    if (!btn) return;
 
-    // green animation + tick
     btn.classList.add("copied");
-    btn.innerText = "✓";
 
-    setTimeout(() => {
-      btn.classList.remove("copied");
-      btn.innerText = "📋";
-    }, 1000);
+    setTimeout(() => btn.classList.remove("copied"), 800);
   });
 }
 
