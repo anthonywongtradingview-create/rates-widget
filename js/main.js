@@ -155,7 +155,6 @@ function renderCombinedTable(id, holidays) {
 
 
 // ---------- RENDER EVENTS ----------
-
 function renderEventsTable(id, events, limit = 10) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -202,6 +201,14 @@ function renderEventsTable(id, events, limit = 10) {
           : raw;
     }
 
+    // ===== Importance Colour Class =====
+    const imp = Number(ev.importance);
+    const importanceClass =
+      imp === 1 ? "importance importance-1" :
+      imp === 2 ? "importance importance-2" :
+      imp === 3 ? "importance importance-3" :
+      "importance";
+
     // Insights cell
     let link = ev.insights || "";
     link = link.replace(/^"+|"+$/g, "").trim();
@@ -214,7 +221,7 @@ function renderEventsTable(id, events, limit = 10) {
       <tr>
         <td style="width:22%;white-space:nowrap;">${dateStr}</td>
         <td style="width:10%;text-align:center;">${ev.currency}</td>
-        <td style="width:18%;text-align:center;">${ev.importance}</td>
+        <td class="${importanceClass}" style="width:18%;text-align:center;">${ev.importance}</td>
         <td style="width:40%;">${ev.event}</td>
         <td style="width:10%;text-align:center;">${insightsCell}</td>
       </tr>`;
