@@ -436,3 +436,43 @@ h2::before {
   background: #b91c1c; /* darker red on hover */
 }
 
+.copy-cell-btn {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  border: none;
+  background: white;
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: opacity 0.2s ease;
+}
+
+.copy-cell-btn.copied {
+  background: #4caf50;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.copy-cell-btn.copied::after {
+  content: "Copied!";
+  position: absolute;
+  top: -22px;
+  right: 0;
+  background: #4caf50;
+  color: white;
+  padding: 2px 6px;
+  font-size: 11px;
+  border-radius: 4px;
+  opacity: 1;
+  animation: copiedFade 1.2s ease forwards;
+}
+
+@keyframes copiedFade {
+  0%   { opacity: 1; transform: translateY(0); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
