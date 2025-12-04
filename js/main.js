@@ -421,24 +421,22 @@ function recalc() {
   const selectedVolume = parseFloat(volumeSelect.value) || 0;
   const volume = useCustom ? customVolume : selectedVolume;
 
-  // Adjusted rates
   const adjusted = marketRate * (1 - margin);
   const inverse = (1 / marketRate) * (1 - margin);
 
-  document.getElementById("offerRate").textContent = adjusted.toFixed(5);
-  document.getElementById("inverseRate").textContent = inverse.toFixed(5);
+  // ⭐ FIXED — now updates your new IDs
+  document.getElementById("dir1Rate").textContent = adjusted.toFixed(5);
+  document.getElementById("dir2Rate").textContent = inverse.toFixed(5);
 
   const baseSymbol = sym(BASE);
   const quoteSymbol = sym(QUOTE);
 
   if (volume > 0) {
-    // Display chosen volumes
     document.getElementById("exchangeEUR").textContent =
       `${baseSymbol}${volume.toLocaleString()}`;
     document.getElementById("exchangeUSD").textContent =
       `${quoteSymbol}${volume.toLocaleString()}`;
 
-    // Amounts
     const offerAmount = adjusted * volume;
     const inverseAmount = inverse * volume;
 
@@ -447,7 +445,6 @@ function recalc() {
     document.getElementById("inverseAmount").textContent =
       `${baseSymbol}${Number(inverseAmount.toFixed(2)).toLocaleString()}`;
 
-    // Revenue (margin - 0.055% cost)
     const effectiveMargin = margin - 0.00055;
 
     if (effectiveMargin > 0) {
