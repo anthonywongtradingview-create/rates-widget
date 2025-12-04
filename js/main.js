@@ -171,7 +171,6 @@ function renderEventsTable(id, events, limit = 10) {
       const raw = ev.datetime.trim();
       let parsed = null;
 
-      // Try Sheets-style "MM/DD/YYYY HH:MM[:SS]"
       const m = raw.match(
         /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}:\d{2}(?::\d{2})?)$/
       );
@@ -201,27 +200,20 @@ function renderEventsTable(id, events, limit = 10) {
           : raw;
     }
 
-    // ===== Importance Colour Class =====
-    const imp = Number(ev.importance);
-    const importanceClass =
-      imp === 1 ? "importance importance-1" :
-      imp === 2 ? "importance importance-2" :
-      imp === 3 ? "importance importance-3" :
-      "importance";
-
-    // Insights cell
     let link = ev.insights || "";
     link = link.replace(/^"+|"+$/g, "").trim();
     const insightsCell =
       link && link.startsWith("http")
         ? `<a href="${link}" target="_blank" class="insight-btn">View</a>`
-        : (link ? `<span>${link}</span>` : `<span style="color:#ccc;">—</span>`);
+        : link
+        ? `<span>${link}</span>`
+        : `<span style="color:#ccc;">—</span>`;
 
     return `
       <tr>
         <td style="width:22%;white-space:nowrap;">${dateStr}</td>
         <td style="width:10%;text-align:center;">${ev.currency}</td>
-        <td class="${importanceClass}" style="width:18%;text-align:center;">${ev.importance}</td>
+        <td style="width:18%;text-align:center;">${ev.importance}</td>
         <td style="width:40%;">${ev.event}</td>
         <td style="width:10%;text-align:center;">${insightsCell}</td>
       </tr>`;
@@ -240,7 +232,27 @@ function renderEventsTable(id, events, limit = 10) {
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
+
+  // === RE-ADD IMPORTANCE BLOCKS ===
+  document.querySelectorAll(`#${id} td:nth-child(3)`).forEach(cell => {
+    const value = Number(cell.textContent.trim());
+    let html = '<div class="importance-blocks">';
+
+    for (let i = 1; i <= 3; i++) {
+      if (i <= value) {
+        if (value === 1) html += '<span class="block-green"></span>';
+        else if (value === 2) html += '<span class="block-orange"></span>';
+        else if (value === 3) html += '<span class="block-red"></span>';
+      } else {
+        html += '<span class="block-empty"></span>';
+      }
+    }
+
+    html += "</div>";
+    cell.innerHTML = html;
+  });
 }
+
 
 
 // ==========================================
