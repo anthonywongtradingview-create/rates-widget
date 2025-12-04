@@ -129,25 +129,6 @@ function toDate(day, monAbbr, year) {
   return m >= 0 ? new Date(`${year}-${m + 1}-${day}`) : new Date();
 }
 
-// ---------- Copy Dashboard Info ----------
-function copyDashboardRate(fromCcy, toCcy) {
-  const ts = document.getElementById("lastUpdate").innerText.trim();
-
-  // choose correct rate based on direction
-  let rateId = (fromCcy === "EUR" && toCcy === "AED") 
-                ? "offerRate" 
-                : "inverseRate";
-
-  const rate = document.getElementById(rateId).innerText.trim();
-
-  const sentence =
-    `What we can offer for ${fromCcy} to ${toCcy} at — ${ts} is ${rate}.`;
-
-  navigator.clipboard.writeText(sentence)
-    .then(() => alert("Copied:\n" + sentence))
-    .catch(err => console.error("Copy failed:", err));
-}
-
 
 // ---------- RENDER HOLIDAYS ----------
 
@@ -502,6 +483,34 @@ function attachCalcListeners() {
   document
     .getElementById("useCustomVolume")
     .addEventListener("change", recalc);
+}
+
+// Copy Sentence for Texting 
+function copyOfferSentence(directionId) {
+  try {
+    const label = document.getElementById(`${directionId}Label`).textContent.trim();
+    const rate = document.getElementById(`${directionId}Rate`).textContent.trim();
+    const timestamp = document.getElementById("lastUpdate").textContent.trim();
+
+    if (!label || !rate || !timestamp) {
+      alert("Unable to copy — missing data.");
+      return;
+    }
+
+    const sentence = `What we can offer for ${label} at — ${timestamp} is ${rate}.`;
+
+    navigator.clipboard.writeText(sentence).then(() => {
+      // Optional confirmation
+      console.log("Copied:", sentence);
+    }).catch(err => {
+      console.error("Clipboard error:", err);
+      alert("Copy failed.");
+    });
+
+  } catch (e) {
+    console.error("Copy function error:", e);
+    alert("Copy failed.");
+  }
 }
 
 
