@@ -184,11 +184,11 @@ tr {
   background-color: #f5fff5;
 }
 
-/* --- Copy Button Fix + Animation --- */
+/* --- Copy Button Fix + Proper Alignment + Animation --- */
 .copy-cell-wrapper {
   position: relative;
   text-align: right;
-  padding-right: 40px; /* keeps rate centered */
+  padding-right: 40px; /* Prevents overlap, keeps rate centered */
 }
 
 .copy-cell-btn {
@@ -196,26 +196,26 @@ tr {
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  background: #fff;
-  border: 1px solid #ddd;
+  background: #ffffff;
+  border: 1px solid #d0d7de;
   border-radius: 6px;
-  padding: 4px;
+  padding: 4px 6px;
   cursor: pointer;
   font-size: 14px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transition: background 0.15s ease, border-color 0.15s ease;
+  opacity: 0.9;
 }
 
 .copy-cell-btn:hover {
-  background: #f0f0f0;
+  background: #f3f4f6;
 }
 
-/* Animated success feedback */
+/* Animated green success feedback */
 .copy-cell-btn.copied {
   background: #d4ffd4 !important;
   border-color: #6ac26a !important;
 }
-
 
 
 /* === Rates Header Flex Layout === */
