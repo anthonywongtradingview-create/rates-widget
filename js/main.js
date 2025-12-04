@@ -489,15 +489,15 @@ function attachCalcListeners() {
 function copyOfferSentence(which) {
   const timestamp = document.getElementById("lastUpdate").innerText.trim();
 
-  const label = document.getElementById(which + "Label").innerText.trim();
-  const rate = document.getElementById(which + "Rate").innerText.trim();
+  const label = document.getElementById(which + "Label").innerText.trim();  // EUR → AED
+  const rate = document.getElementById(which + "Rate").innerText.trim();    // e.g. 4.27777
 
-  const sentence = `What we can offer for ${label} at — ${timestamp} is ${rate}.`;
+  const sentence = `We can offer for ${label} at — ${timestamp} is ${rate}.`;
 
   navigator.clipboard.writeText(sentence).then(() => {
     const btn = document.querySelector(`button[onclick="copyOfferSentence('${which}')"]`);
 
-    // flash green animation
+    // green animation + tick
     btn.classList.add("copied");
     btn.innerText = "✓";
 
