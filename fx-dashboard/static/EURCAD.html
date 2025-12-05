@@ -51,17 +51,32 @@
           </th>
         </tr>
       </thead>
+    
       <tbody>
-        <tr>
-          <td><strong>EUR&gt;CAD</strong></td>
-          <td id="offerRate">–</td>
+        <tr class="rowGreenLight">
+          <td><strong id="dir1Label">EUR → GBP</strong></td>
+    
+          <td class="copy-cell-wrapper">
+            <span id="dir1Rate">–</span>
+    
+            <button class="copy-cell-btn"
+              onclick="copyOfferSentence('dir1')">📋</button>
+          </td>
         </tr>
-        <tr>
-          <td><strong>CAD&gt;EUR</strong></td>
-          <td id="inverseRate">–</td>
+    
+        <tr class="rowGreenDark">
+          <td><strong id="dir2Label">GBP → EUR</strong></td>
+    
+          <td class="copy-cell-wrapper">
+            <span id="dir2Rate">–</span>
+    
+            <button class="copy-cell-btn"
+              onclick="copyOfferSentence('dir2')">📋</button>
+          </td>
         </tr>
       </tbody>
     </table>
+
 
     <!-- Offer Table -->
     <table class="offer-table">
